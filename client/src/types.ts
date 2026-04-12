@@ -1,6 +1,14 @@
 export interface User {
+  id: string;
   username: string;
+  role: 'PLAYER' | 'DEV' | 'ADMIN';
   level: number;
+  isBanned?: boolean;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: User;
 }
 
 export interface LevelRules {

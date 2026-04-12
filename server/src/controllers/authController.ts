@@ -1,9 +1,12 @@
 import { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { prisma } from '../prisma';
 
 const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,20}$/;
 const BCRYPT_ROUNDS = 12;
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production';
+const JWT_EXPIRY = '7d';
 
 export async function register(req: Request, res: Response): Promise<void> {
   const { username, password } = req.body;
@@ -25,18 +28,33 @@ export async function register(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+  const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
   try {
     const user = await prisma.user.create({
-      data: { username, password: hash },
-      select: { id: true, username: true, level: true },
+      data: { username, passwordHash },
+      select: { id: true, username: true, role: true, level: true },
     });
 
-    req.session.userId = user.id;
-    req.session.username = user.username;
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        username: user.username,
+        role: user.role,
+      },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRY }
+    );
 
-    res.status(201).json({ username: user.username, level: user.level });
+    res.status(201).json({
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        level: user.level,
+      },
+    });
   } catch (err: unknown) {
     if (
       typeof err === 'object' &&
@@ -61,32 +79,52 @@ export async function login(req: Request, res: Response): Promise<void> {
 
   const user = await prisma.user.findUnique({ where: { username } });
 
-  if (!user || !(await bcrypt.compare(password, user.password))) {
+  if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
     res.status(401).json({ error: 'Špatné uživatelské jméno nebo heslo.' });
     return;
   }
 
-  req.session.userId = user.id;
-  req.session.username = user.username;
+  if (user.isBanned) {
+    res.status(403).json({ error: 'Tvůj účet je zablokován.' });
+    return;
+  }
 
-  res.json({ username: user.username, level: user.level });
-}
+  // Update lastLogin timestamp
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { lastLogin: new Date() },
+  });
 
-export async function logout(req: Request, res: Response): Promise<void> {
-  req.session.destroy((err) => {
-    if (err) {
-      res.status(500).json({ error: 'Chyba při odhlášení.' });
-      return;
-    }
-    res.clearCookie('connect.sid');
-    res.json({ message: 'Byl jsi odhlášen.' });
+  const token = jwt.sign(
+    {
+      userId: user.id,
+      username: user.username,
+      role: user.role,
+    },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRY }
+  );
+
+  res.json({
+    token,
+    user: {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      level: user.level,
+    },
   });
 }
 
 export async function getMe(req: Request, res: Response): Promise<void> {
+  if (!req.user) {
+    res.status(401).json({ error: 'Uživatel není autentizován.' });
+    return;
+  }
+
   const user = await prisma.user.findUnique({
-    where: { id: req.session.userId },
-    select: { username: true, level: true },
+    where: { id: req.user.userId },
+    select: { id: true, username: true, role: true, level: true, isBanned: true },
   });
 
   if (!user) {

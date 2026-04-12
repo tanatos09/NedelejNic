@@ -1,9 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
+import { verifyJWT } from './verifyJWT';
 
+// Alias pro verifyJWT - udržuje kompatibilitu s existujícím kódem
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
-  if (!req.session.userId) {
-    res.status(401).json({ error: 'Nejsi přihlášen.' });
-    return;
-  }
-  next();
+  verifyJWT(req, res, next);
 }

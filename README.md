@@ -66,23 +66,41 @@ Aplikace běží na: **http://localhost:5173**
 nedelejnic/
 ├── client/               # React + Vite + TypeScript
 │   └── src/
-│       ├── pages/        # AuthPage, GamePage
-│       ├── services/     # API volání
-│       └── types.ts      # Sdílené typy
+│       ├── components/   # UI komponenty, admin komponenty
+│       ├── engine/       # LevelEngine, InputSystem
+│       ├── hooks/        # useAuthGuard, useAdminQueries
+│       ├── pages/        # AuthPage, GamePage, AdminDashboard, UsersPage
+│       ├── services/     # API volání (api, adminApi, httpClient)
+│       ├── store/        # Zustand (adminStore)
+│       └── types/        # TypeScript definice
 ├── server/               # Node.js + Express + TypeScript
-│   ├── prisma/           # Prisma schema
+│   ├── prisma/           # Prisma schema + migrace
 │   └── src/
-│       ├── controllers/  # Logika endpointů
-│       ├── middleware/   # Auth, rate limit
+│       ├── controllers/  # auth, game, admin
+│       ├── middleware/    # Auth, role check, rate limit
 │       ├── routes/       # Express routery
 │       ├── levels.ts     # Konfigurace levelů
 │       └── app.ts        # Express aplikace
-└── .env.example
+└── docs/                 # Dokumentace projektu
 ```
 
 ---
 
+## Role
+
+| Role   | Popis                                                                 |
+|--------|-----------------------------------------------------------------------|
+| PLAYER | Normální hráč — automatická progrese, auto-logout po levelu          |
+| DEV    | Debug režim — pause/resume, step mode, jump level, event log         |
+| ADMIN  | Plný přístup — admin dashboard + vše co DEV                         |
+
+Nový uživatel má vždy roli `PLAYER`. Role se mění přes admin dashboard (pouze ADMIN).
+
+---
+
 ## API endpointy
+
+### Autentizace
 
 | Metoda | Cesta             | Popis                              |
 |--------|-------------------|------------------------------------|
@@ -90,8 +108,26 @@ nedelejnic/
 | POST   | /auth/login       | Přihlášení                         |
 | POST   | /auth/logout      | Odhlášení                          |
 | GET    | /auth/me          | Aktuální přihlášený hráč           |
-| GET    | /level            | Konfigurace aktuálního levelu      |
+
+### Hra
+
+| Metoda | Cesta             | Popis                              |
+|--------|-------------------|------------------------------------|
+| GET    | /level/:id        | Konfigurace levelu                 |
 | POST   | /result           | Odeslání výsledku (success / fail) |
+
+### Admin (vyžaduje ADMIN nebo DEV roli)
+
+| Metoda | Cesta                              | Popis                          |
+|--------|------------------------------------|---------------------------------|
+| GET    | /admin/users                       | Seznam uživatelů (paginated)   |
+| GET    | /admin/users/:userId               | Detail uživatele + audit log   |
+| PUT    | /admin/users/:userId/role          | Změna role (pouze ADMIN)       |
+| PUT    | /admin/users/:userId/ban           | Ban/unban (pouze ADMIN)        |
+| PUT    | /admin/users/:userId/level         | Nastavení levelu               |
+| POST   | /admin/users/:userId/reset-progress| Reset progresu na level 1      |
+| POST   | /admin/users/:userId/invalidate-session | Nucené odhlášení          |
+| GET    | /admin/audit                       | Audit log (paginated)          |
 
 ---
 

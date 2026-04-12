@@ -9,5 +9,3 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 server/prisma/migrations/
-PROJECT_SPEC.md
-AI_PROJECT_CONTEXT.md

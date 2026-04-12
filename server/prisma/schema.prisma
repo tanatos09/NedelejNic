@@ -7,10 +7,41 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  PLAYER
+  DEV
+  ADMIN
+}
+
 model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  role         UserRole @default(PLAYER)
+  isBanned     Boolean  @default(false)
+  level        Int      @default(1)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  lastLogin    DateTime?
+
+  // Audit logs performed BY this user
+  auditActions AuditLog[] @relation("AuditActor")
+  // Audit logs targeting this user
+  auditTargets AuditLog[] @relation("AuditTarget")
+}
+
+model AuditLog {
   id        String   @id @default(cuid())
-  username  String   @unique
-  password  String
-  level     Int      @default(1)
+  action    String   // e.g. "CHANGE_ROLE", "BAN", "UNBAN", "SET_LEVEL", "RESET_PROGRESS"
+  detail    String?  // JSON string with before/after values
+  actorId   String
+  targetId  String
   createdAt DateTime @default(now())
+
+  actor  User @relation("AuditActor", fields: [actorId], references: [id])
+  target User @relation("AuditTarget", fields: [targetId], references: [id])
+
+  @@index([actorId])
+  @@index([targetId])
+  @@index([createdAt])
 }

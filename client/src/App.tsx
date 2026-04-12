@@ -1,8 +1,17 @@
 import { useState, useEffect } from 'react';
 import AuthPage from './pages/AuthPage';
 import GamePage from './pages/GamePage';
+import { AdminDashboard } from './pages/AdminDashboard';
 import { api } from './services/api';
+import { setOnUnauthorizedHandler } from './services/httpClient';
+import { useAdminStore } from './store/adminStore';
 import type { User } from './types';
+
+function setupUnauthorizedHandler(handleLogout: () => void) {
+  setOnUnauthorizedHandler(() => {
+    handleLogout();
+  });
+}
 
 function isMobile(): boolean {
   return (
@@ -11,15 +20,32 @@ function isMobile(): boolean {
   );
 }
 
+type AppPage = 'auth' | 'game' | 'admin';
+
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState<AppPage>('auth');
+
+  useEffect(() => {
+    setupUnauthorizedHandler(() => {
+      setUser(null);
+      setCurrentPage('auth');
+      useAdminStore.getState().logout();
+    });
+  }, []);
 
   useEffect(() => {
     api
       .me()
-      .then(setUser)
-      .catch(() => setUser(null))
+      .then((userData) => {
+        setUser(userData);
+        setCurrentPage(userData.role === 'ADMIN' ? 'admin' : 'game');
+      })
+      .catch(() => {
+        setUser(null);
+        setCurrentPage('auth');
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -55,6 +81,7 @@ export default function App() {
           height: '100vh',
           alignItems: 'center',
           justifyContent: 'center',
+          backgroundColor: '#000',
         }}
       >
         <span style={{ color: '#333', fontSize: '14px' }}>Načítám...</span>
@@ -62,16 +89,48 @@ export default function App() {
     );
   }
 
+  // Not logged in
   if (!user) {
-    return <AuthPage onLogin={setUser} />;
+    return (
+      <AuthPage
+        onLogin={(u) => {
+          setUser(u);
+          setCurrentPage(u.role === 'ADMIN' ? 'admin' : 'game');
+        }}
+      />
+    );
   }
 
+  const handleLogout = () => {
+    api.logout();
+    setUser(null);
+    setCurrentPage('auth');
+    useAdminStore.getState().logout();
+  };
+
+  const canAccessAdmin = user.role === 'ADMIN';
+
+  const handleAccessAdmin = () => {
+    if (canAccessAdmin) {
+      setCurrentPage('admin');
+    }
+  };
+
+  const handleBackFromAdmin = () => {
+    setCurrentPage('game');
+  };
+
+  // Admin dashboard — ADMIN only
+  if (currentPage === 'admin' && canAccessAdmin) {
+    return <AdminDashboard onBack={handleBackFromAdmin} />;
+  }
+
+  // Game page (PLAYER, DEV, ADMIN — each sees appropriate UI)
   return (
     <GamePage
       user={user}
-      onLevelChange={(newLevel) =>
-        setUser((prev) => (prev ? { ...prev, level: newLevel } : prev))
-      }
+      onLogout={handleLogout}
+      onAdmin={canAccessAdmin ? handleAccessAdmin : undefined}
     />
   );
 }

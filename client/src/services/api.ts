@@ -1,43 +1,49 @@
-import type { User, LevelConfig, GameResult } from '../types';
+import type { User, LevelConfig, GameResult, AuthResponse } from '../types';
+import { httpClient, setToken, clearToken } from './httpClient';
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(path, {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error((data as { error?: string }).error ?? 'Neznámá chyba.');
-  }
-
-  return data as T;
-}
+/**
+ * Main API service - uses httpClient (API Interceptor)
+ * 
+ * httpClient handles:
+ * ✓ JWT injection on every request
+ * ✓ 401 handling (global logout)
+ * ✓ Trusted data validation
+ * 
+ * This layer just organizes endpoints
+ */
 
 export const api = {
-  register: (username: string, password: string) =>
-    request<User>('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ username, password }),
-    }),
+  register: async (username: string, password: string): Promise<User> => {
+    const response = await httpClient.post<AuthResponse>('/auth/register', {
+      username,
+      password,
+    });
+    setToken(response.token);
+    return response.user;
+  },
 
-  login: (username: string, password: string) =>
-    request<User>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ username, password }),
-    }),
+  login: async (username: string, password: string): Promise<User> => {
+    const response = await httpClient.post<AuthResponse>('/auth/login', {
+      username,
+      password,
+    });
+    setToken(response.token);
+    return response.user;
+  },
 
-  logout: () => request<{ message: string }>('/auth/logout', { method: 'POST' }),
+  me: () => httpClient.get<User>('/auth/me'),
 
-  me: () => request<User>('/auth/me'),
-
-  getLevel: (id: number) => request<LevelConfig>(`/level/${id}`),
+  getLevel: (id: number) => httpClient.get<LevelConfig>(`/level/${id}`),
 
   postResult: (result: GameResult, levelId: number, signature: string) =>
-    request<{ message: string; newLevel: number }>('/result', {
-      method: 'POST',
-      body: JSON.stringify({ result, levelId, signature }),
+    httpClient.post<{ message: string; newLevel: number }>('/result', {
+      result,
+      levelId,
+      signature,
     }),
+
+  logout: () => {
+    clearToken();
+    return Promise.resolve();
+  },
 };
