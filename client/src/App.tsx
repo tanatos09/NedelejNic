@@ -40,7 +40,7 @@ export default function App() {
       .me()
       .then((userData) => {
         setUser(userData);
-        setCurrentPage(userData.role === 'ADMIN' ? 'admin' : 'game');
+        setCurrentPage(userData.role === 'ADMIN' || userData.role === 'DEV' ? 'admin' : 'game');
       })
       .catch(() => {
         setUser(null);
@@ -95,7 +95,7 @@ export default function App() {
       <AuthPage
         onLogin={(u) => {
           setUser(u);
-          setCurrentPage(u.role === 'ADMIN' ? 'admin' : 'game');
+          setCurrentPage(u.role === 'ADMIN' || u.role === 'DEV' ? 'admin' : 'game');
         }}
       />
     );
@@ -108,7 +108,7 @@ export default function App() {
     useAdminStore.getState().logout();
   };
 
-  const canAccessAdmin = user.role === 'ADMIN';
+  const canAccessAdmin = user.role === 'ADMIN' || user.role === 'DEV';
 
   const handleAccessAdmin = () => {
     if (canAccessAdmin) {
@@ -120,7 +120,7 @@ export default function App() {
     setCurrentPage('game');
   };
 
-  // Admin dashboard — ADMIN only
+  // Admin dashboard — ADMIN/DEV
   if (currentPage === 'admin' && canAccessAdmin) {
     return <AdminDashboard onBack={handleBackFromAdmin} />;
   }

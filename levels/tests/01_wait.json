@@ -1,0 +1,20 @@
+{
+  "id": 1,
+  "type": "action",
+  "title": "01 Wait",
+  "assets": { "voices": [], "music": [], "sounds": [] },
+  "rules": {
+    "click": "forbidden",
+    "mouseMove": "forbidden",
+    "keyboard": "forbidden",
+    "scroll": "forbidden",
+    "touch": "forbidden"
+  },
+  "end": { "type": "timer", "time": 12 },
+  "timeline": [
+    { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Jen čekej. 12 sekund." },
+    { "at": "6s", "do": "text.set", "slot": "subtitle", "text": "Pořád nic." },
+    { "at": "12s", "do": "level.end", "result": "success" }
+  ]
+}
+

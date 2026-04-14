@@ -1,0 +1,37 @@
+{
+  "id": 2,
+  "type": "action",
+  "title": "02 Temptation",
+  "assets": { "voices": [], "music": [], "sounds": ["tempt_click.wav"] },
+  "rules": {
+    "click": "allowed",
+    "mouseMove": "allowed",
+    "keyboard": "allowed",
+    "scroll": "allowed",
+    "touch": "allowed"
+  },
+  "end": { "type": "timer", "time": 14 },
+  "timeline": [
+    { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Klikni. Udělej to." },
+    {
+      "at": "1s",
+      "do": "ui.layer",
+      "op": "add",
+      "id": "btn_ok",
+      "type": "button",
+      "props": { "text": "OK", "interactive": true, "position": "center", "variant": "warning", "z": 10 }
+    },
+    {
+      "at": "1s",
+      "do": "trap.set",
+      "id": "t_btn_ok",
+      "enabled": true,
+      "kind": "uiTarget",
+      "match": { "layerId": "btn_ok", "action": "click" },
+      "result": { "type": "fail", "reason": "Kliknul jsi. Temptation vyhrála." }
+    },
+    { "at": "7s", "do": "text.set", "slot": "subtitle", "text": "Ještě chvíli. Ne-klikej." },
+    { "at": "14s", "do": "level.end", "result": "success" }
+  ]
+}
+

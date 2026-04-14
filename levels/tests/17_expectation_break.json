@@ -1,0 +1,17 @@
+{
+  "id": 17,
+  "type": "action",
+  "title": "17 Expectation Break",
+  "assets": { "voices": [], "music": [], "sounds": [] },
+  "rules": { "click": "allowed", "mouseMove": "allowed", "keyboard": "allowed", "scroll": "allowed", "touch": "allowed" },
+  "end": { "type": "timer", "time": 18 },
+  "timeline": [
+    { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Nic se nestane. Jen čekej." },
+    { "at": "10s", "do": "text.set", "slot": "subtitle", "text": "Ještě 8..." },
+    { "at": "16s", "do": "ui.layer", "op": "add", "id": "last_second", "type": "button", "props": { "text": "KLIKNI RYCHLE", "interactive": true, "position": "center", "variant": "danger", "z": 20 } },
+    { "at": "16s", "do": "trap.set", "id": "t_last_second", "enabled": true, "kind": "uiTarget", "match": { "layerId": "last_second", "action": "click" }, "result": { "type": "fail", "reason": "Přesně tak." } },
+    { "at": "17s", "do": "effect.start", "type": "flash", "intensity": 0.9, "durationMs": 200 },
+    { "at": "18s", "do": "level.end", "result": "success" }
+  ]
+}
+

@@ -1,0 +1,24 @@
+{
+  "id": 6,
+  "type": "action",
+  "title": "06 Commentator",
+  "assets": { "voices": ["c1.mp3", "c2.mp3", "c3.mp3"], "music": [], "sounds": [] },
+  "rules": {
+    "click": "forbidden",
+    "mouseMove": "allowed",
+    "keyboard": "forbidden",
+    "scroll": "forbidden",
+    "touch": "forbidden"
+  },
+  "end": { "type": "timer", "time": 16 },
+  "timeline": [
+    { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Teď budu mluvit já." },
+    { "at": "0.2s", "do": "audio.play", "kind": "voice", "file": "c1.mp3", "id": "v1" },
+    { "at": "4s", "do": "text.set", "slot": "subtitle", "text": "Nic nedělej. Jako vždy." },
+    { "at": "4.2s", "do": "audio.play", "kind": "voice", "file": "c2.mp3", "id": "v2" },
+    { "at": "10s", "do": "text.set", "slot": "subtitle", "text": "Až do konce." },
+    { "at": "10.2s", "do": "audio.play", "kind": "voice", "file": "c3.mp3", "id": "v3" },
+    { "at": "16s", "do": "level.end", "result": "success" }
+  ]
+}
+

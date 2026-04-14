@@ -11,19 +11,14 @@ export interface AuthResponse {
   user: User;
 }
 
-export interface LevelRules {
-  mouseMove: boolean;
-  click: boolean;
-  keyboard: boolean;
-  scroll: boolean;
-  touch: boolean;
-}
+export type RuleMode = 'forbidden' | 'allowed' | 'required';
 
-export interface LevelEvent {
-  time: number;
-  type: 'subtitle' | 'clear' | 'voice';
-  text?: string;
-  audio?: string;
+export interface LevelRules {
+  mouseMove: RuleMode;
+  click: RuleMode;
+  keyboard: RuleMode;
+  scroll: RuleMode;
+  touch: RuleMode;
 }
 
 export interface LevelEnd {
@@ -31,12 +26,27 @@ export interface LevelEnd {
   time: number;
 }
 
-export interface LevelConfig {
+export type ActionLevel = {
   id: number;
-  rules: LevelRules;
-  events: LevelEvent[];
-  end: LevelEnd;
+  type: 'action';
+  title?: string;
+  assets?: { voices?: string[]; music?: string[]; sounds?: string[] };
+  rules?: Partial<LevelRules>;
+  end?: LevelEnd;
+  timeline: unknown[];
   signature: string;
-}
+};
+
+export type CustomLevel = {
+  id: number;
+  type: 'custom';
+  title?: string;
+  module: string;
+  assets?: { voices?: string[]; music?: string[]; sounds?: string[] };
+  end?: LevelEnd;
+  signature: string;
+};
+
+export type LevelConfig = ActionLevel | CustomLevel;
 
 export type GameResult = 'success' | 'fail';

@@ -1,4 +1,4 @@
-import type { LevelConfig } from '../types';
+import type { LegacyLevelConfig } from '../legacyTypes';
 import { InputSystem } from './InputSystem';
 
 export interface EngineCallbacks {
@@ -37,7 +37,7 @@ export interface EngineSnapshot {
 }
 
 export class LevelEngine {
-  private config: LevelConfig;
+  private config: LegacyLevelConfig;
   private callbacks: EngineCallbacks;
   private inputSystem: InputSystem;
   private timers: number[] = [];
@@ -50,12 +50,20 @@ export class LevelEngine {
   private currentEventIndex = 0;
   private _state: EngineState = 'idle';
   private eventLog: EventLogEntry[] = [];
+  private audioObjects: HTMLAudioElement[] = [];
 
-  constructor(config: LevelConfig, callbacks: EngineCallbacks, devMode?: DevModeState) {
+  constructor(config: LegacyLevelConfig, callbacks: EngineCallbacks, devMode?: DevModeState) {
     this.config = config;
     this.callbacks = callbacks;
     this.devMode = devMode || { enabled: false, stepMode: false };
-    this.inputSystem = new InputSystem(config.rules, {
+    const convertedRules = {
+      mouseMove: config.rules.mouseMove ? 'forbidden' : 'allowed',
+      click: config.rules.click ? 'forbidden' : 'allowed',
+      keyboard: config.rules.keyboard ? 'forbidden' : 'allowed',
+      scroll: config.rules.scroll ? 'forbidden' : 'allowed',
+      touch: config.rules.touch ? 'forbidden' : 'allowed',
+    } as any;
+    this.inputSystem = new InputSystem(convertedRules, {
       onFail: (reason) => this.fail(reason),
     });
   }
@@ -98,6 +106,7 @@ export class LevelEngine {
     this.ended = true;
     this.clearTimers();
     this.detachInputListeners();
+    this.stopAllAudio();
     this.setState('ended');
   }
 
@@ -195,6 +204,16 @@ export class LevelEngine {
     return [...this.eventLog];
   }
 
+  // ── Audio ─────────────────────────────────────
+
+  private stopAllAudio(): void {
+    for (const audio of this.audioObjects) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+    this.audioObjects = [];
+  }
+
   // ── Internal ──────────────────────────────────
 
   private fail(reason: string): void {
@@ -283,6 +302,10 @@ export class LevelEngine {
       this.callbacks.onSubtitle('');
     } else if (event.type === 'subtitle' && event.text) {
       this.callbacks.onSubtitle(event.text);
+    } else if (event.type === 'voice' && event.audio) {
+      const audio = new Audio(`/assets/audio/${event.audio}`);
+      audio.play().catch(() => {});
+      this.audioObjects.push(audio);
     }
 
     this.currentEventIndex = index + 1;
@@ -308,7 +331,7 @@ export class LevelEngine {
   }
 }
 
-export async function preloadAssets(config: LevelConfig): Promise<void> {
+export async function preloadAssets(config: LegacyLevelConfig): Promise<void> {
   const audioEvents = config.events.filter((e) => e.type === 'voice' && e.audio);
   if (audioEvents.length === 0) return;
 
@@ -317,8 +340,29 @@ export async function preloadAssets(config: LevelConfig): Promise<void> {
       (e) =>
         new Promise<void>((resolve) => {
           const audio = new Audio(`/assets/audio/${e.audio}`);
-          audio.addEventListener('canplaythrough', () => resolve(), { once: true });
-          audio.addEventListener('error', () => resolve(), { once: true });
+          let done = false;
+          const finish = () => {
+            if (done) return;
+            done = true;
+            resolve();
+          };
+
+          // Some browsers never fire canplaythrough/error for missing/blocked media.
+          // Hardening: always resolve within a short timeout.
+          const t = window.setTimeout(finish, 2500);
+
+          audio.addEventListener('canplaythrough', () => {
+            clearTimeout(t);
+            finish();
+          }, { once: true });
+          audio.addEventListener('loadeddata', () => {
+            clearTimeout(t);
+            finish();
+          }, { once: true });
+          audio.addEventListener('error', () => {
+            clearTimeout(t);
+            finish();
+          }, { once: true });
           audio.load();
         })
     )

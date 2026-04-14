@@ -1,0 +1,19 @@
+{
+  "id": 16,
+  "type": "action",
+  "title": "16 Existential",
+  "assets": { "voices": ["ex1.mp3", "ex2.mp3"], "music": ["void.ogg"], "sounds": [] },
+  "rules": { "click": "forbidden", "mouseMove": "allowed", "keyboard": "forbidden", "scroll": "forbidden", "touch": "forbidden" },
+  "end": { "type": "timer", "time": 22 },
+  "timeline": [
+    { "at": "0s", "do": "audio.play", "kind": "music", "file": "void.ogg", "id": "m", "loop": true, "volume": 0.25 },
+    { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Existuješ." },
+    { "at": "1s", "do": "audio.play", "kind": "voice", "file": "ex1.mp3", "id": "v1", "volume": 1 },
+    { "at": "9s", "do": "text.set", "slot": "subtitle", "text": "A stejně nic neuděláš." },
+    { "at": "10s", "do": "audio.play", "kind": "voice", "file": "ex2.mp3", "id": "v2", "volume": 1 },
+    { "at": "18s", "do": "text.set", "slot": "subtitle", "text": "To je celý příběh." },
+    { "at": "22s", "do": "audio.stop", "id": "m" },
+    { "at": "22s", "do": "level.end", "result": "success" }
+  ]
+}
+

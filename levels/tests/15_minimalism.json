@@ -1,0 +1,14 @@
+{
+  "id": 15,
+  "type": "action",
+  "title": "15 Minimalism",
+  "assets": { "voices": [], "music": [], "sounds": [] },
+  "rules": { "click": "forbidden", "mouseMove": "forbidden", "keyboard": "forbidden", "scroll": "forbidden", "touch": "forbidden" },
+  "end": { "type": "timer", "time": 9 },
+  "timeline": [
+    { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "." },
+    { "at": "4s", "do": "text.set", "slot": "subtitle", "text": "" },
+    { "at": "9s", "do": "level.end", "result": "success" }
+  ]
+}
+

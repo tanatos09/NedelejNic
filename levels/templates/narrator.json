@@ -1,0 +1,15 @@
+{
+  "id": 1005,
+  "type": "action",
+  "title": "Narrator arc",
+  "assets": { "voices": [], "music": [], "sounds": [] },
+  "rules": { "click": "forbidden", "mouseMove": "allowed", "keyboard": "forbidden", "scroll": "forbidden", "touch": "forbidden" },
+  "end": { "type": "timer", "time": 14 },
+  "timeline": [
+    { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Dívej se. Jen dívej." },
+    { "at": "4s", "do": "text.set", "slot": "subtitle", "text": "Tvoje ruka cuká, co?" },
+    { "at": "8s", "do": "text.set", "slot": "subtitle", "text": "Ještě 6 sekund. Vydržíš?" },
+    { "at": "14s", "do": "level.end", "result": "success" }
+  ]
+}
+

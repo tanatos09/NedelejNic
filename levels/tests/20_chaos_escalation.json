@@ -1,0 +1,38 @@
+{
+  "id": 20,
+  "type": "action",
+  "title": "20 Chaos Escalation",
+  "assets": { "voices": [], "music": [], "sounds": ["tick.wav"] },
+  "rules": { "click": "allowed", "mouseMove": "allowed", "keyboard": "allowed", "scroll": "allowed", "touch": "allowed" },
+  "end": { "type": "timer", "time": 18 },
+  "timeline": [
+    { "at": "0s", "do": "state.set", "key": "chaos", "value": 0 },
+    { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Chaos level: 0" },
+    { "at": "2s", "do": "state.add", "key": "chaos", "delta": 1 },
+    { "at": "2s", "do": "audio.play", "kind": "sound", "file": "tick.wav", "volume": 0.6 },
+    { "at": "2s", "do": "text.set", "slot": "subtitle", "text": "Chaos level: 1" },
+    { "at": "2s", "do": "effect.start", "type": "shake", "intensity": 0.2, "durationMs": 180 },
+
+    { "at": "5s", "do": "state.add", "key": "chaos", "delta": 1 },
+    { "at": "5s", "do": "audio.play", "kind": "sound", "file": "tick.wav", "volume": 0.6 },
+    { "at": "5s", "do": "text.set", "slot": "subtitle", "text": "Chaos level: 2" },
+    { "at": "5s", "do": "effect.start", "type": "glitch", "intensity": 0.5, "durationMs": 450 },
+
+    { "at": "8s", "do": "state.add", "key": "chaos", "delta": 1 },
+    { "at": "8s", "do": "audio.play", "kind": "sound", "file": "tick.wav", "volume": 0.6 },
+    { "at": "8s", "do": "text.set", "slot": "subtitle", "text": "Chaos level: 3" },
+    { "at": "8s", "do": "effect.start", "type": "invert", "intensity": 0.6, "durationMs": 500 },
+
+    { "at": "11s", "do": "state.add", "key": "chaos", "delta": 1 },
+    { "at": "11s", "do": "audio.play", "kind": "sound", "file": "tick.wav", "volume": 0.6 },
+    { "at": "11s", "do": "text.set", "slot": "subtitle", "text": "Chaos level: 4" },
+    { "at": "11s", "do": "effect.start", "type": "blur", "intensity": 0.7, "durationMs": 650 },
+
+    { "at": "14s", "do": "state.add", "key": "chaos", "delta": 1 },
+    { "at": "14s", "do": "audio.play", "kind": "sound", "file": "tick.wav", "volume": 0.6 },
+    { "at": "14s", "do": "text.set", "slot": "subtitle", "text": "Chaos level: 5 (konec)" },
+    { "at": "14s", "do": "effect.start", "type": "flash", "intensity": 0.7, "durationMs": 220 },
+    { "at": "14.1s", "do": "level.end", "result": "success" }
+  ]
+}
+

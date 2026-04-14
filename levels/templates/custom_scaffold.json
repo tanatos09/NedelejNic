@@ -1,0 +1,8 @@
+{
+  "id": 1099,
+  "type": "custom",
+  "module": "level_1099_customExample",
+  "assets": { "voices": [], "music": [], "sounds": [] },
+  "end": { "type": "timer", "time": 15 }
+}
+

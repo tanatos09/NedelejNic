@@ -1,0 +1,22 @@
+{
+  "id": 1004,
+  "type": "action",
+  "title": "Puzzle (secret pattern)",
+  "assets": { "voices": [], "music": [], "sounds": [] },
+  "rules": { "click": "allowed", "mouseMove": "allowed", "keyboard": "allowed", "scroll": "allowed", "touch": "allowed" },
+  "end": { "type": "timer", "time": 20 },
+  "timeline": [
+    { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Tajná kombinace: X, X, X do 2 sekund." },
+    {
+      "at": "0s",
+      "do": "trap.set",
+      "id": "t_xxx",
+      "enabled": true,
+      "kind": "inputPattern",
+      "match": { "sequence": ["KeyX", "KeyX", "KeyX"], "withinMs": 2000 },
+      "result": { "type": "success" }
+    },
+    { "at": "20s", "do": "level.end", "result": "fail", "reason": "Nestihl jsi pattern." }
+  ]
+}
+

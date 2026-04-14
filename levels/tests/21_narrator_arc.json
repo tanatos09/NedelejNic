@@ -1,0 +1,32 @@
+{
+  "id": 21,
+  "type": "action",
+  "title": "21 Narrator Arc",
+  "assets": { "voices": ["n1.mp3", "n2.mp3", "n3.mp3"], "music": [], "sounds": [] },
+  "rules": { "click": "forbidden", "mouseMove": "allowed", "keyboard": "forbidden", "scroll": "forbidden", "touch": "forbidden" },
+  "end": { "type": "timer", "time": 20 },
+  "timeline": [
+    { "at": "0s", "do": "state.set", "key": "tone", "value": 0 },
+    { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Jsem tady." },
+    { "at": "0.2s", "do": "audio.play", "kind": "voice", "file": "n1.mp3", "id": "v1" },
+
+    { "at": "6s", "do": "state.add", "key": "tone", "delta": 1 },
+    { "at": "6s", "do": "flow.branch", "if": { "var": "tone", "op": "gte", "value": 1 }, "then": "T1", "else": "T0" },
+    { "label": "T0" },
+    { "do": "flow.goto", "label": "MID" },
+    { "label": "T1" },
+    { "do": "text.set", "slot": "subtitle", "text": "Začínáš chápat, že nic není hra." },
+    { "do": "audio.play", "kind": "voice", "file": "n2.mp3", "id": "v2" },
+    { "label": "MID" },
+
+    { "at": "13s", "do": "state.add", "key": "tone", "delta": 1 },
+    { "at": "13s", "do": "flow.branch", "if": { "var": "tone", "op": "gte", "value": 2 }, "then": "T2", "else": "ENDTXT" },
+    { "label": "T2" },
+    { "do": "text.set", "slot": "subtitle", "text": "Dobře. Teď už jen dojeď do konce." },
+    { "do": "audio.play", "kind": "voice", "file": "n3.mp3", "id": "v3" },
+    { "label": "ENDTXT" },
+
+    { "at": "20s", "do": "level.end", "result": "success" }
+  ]
+}
+

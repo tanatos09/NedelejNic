@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import { api } from '../services/api';
-import { LevelEngine, preloadAssets } from '../engine/LevelEngine';
-import type { EngineState, EventLogEntry } from '../engine/LevelEngine';
+import { LevelRunner } from '../engine/newEngine/LevelRunner';
+import type { EngineState, EventLogEntry, RenderModel } from '../engine/newEngine/types';
 import type { User, LevelConfig } from '../types';
 
 interface Props {
@@ -21,10 +21,11 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
   const [nextSecs, setNextSecs] = useState(10);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [renderModel, setRenderModel] = useState<RenderModel | null>(null);
+  const [devDebugSnap, setDevDebugSnap] = useState<any>(null);
 
   // Dev/Admin state
   const [devStepMode, setDevStepMode] = useState(false);
-  const [devEventIndex, setDevEventIndex] = useState(0);
   const [devEngineState, setDevEngineState] = useState<EngineState>('idle');
   const [devEventLog, setDevEventLog] = useState<EventLogEntry[]>([]);
   const [devLevelSelect, setDevLevelSelect] = useState<number>(user.level);
@@ -33,13 +34,14 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
   // Pause menu is shown when engine is paused AND we are in dev mode
   const showPauseMenu = isDevUser && devEngineState === 'paused' && phase === 'playing';
 
-  const engineRef = useRef<LevelEngine | null>(null);
+  const engineRef = useRef<LevelRunner | null>(null);
   const onLogoutRef = useRef(onLogout);
   useEffect(() => { onLogoutRef.current = onLogout; }, [onLogout]);
 
   // ── Load level ─────────────────────────────────────────────────
   const loadLevel = useCallback(
     (levelId: number) => {
+      console.log('[Game] loadLevel start', { levelId, role: user.role });
       engineRef.current?.stop();
       engineRef.current = null;
       setPhase('loading');
@@ -49,52 +51,65 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
       setFailReason('');
       setError(null);
       setDevEventLog([]);
-      setDevEventIndex(0);
       setDevEngineState('idle');
+      setRenderModel(null);
 
       api
         .getLevel(levelId)
         .then(async (cfg) => {
+          console.log('[Game] getLevel ok', { id: cfg.id, type: (cfg as any).type });
           setConfig(cfg);
-          await preloadAssets(cfg);
           setPhase('intro');
 
           const introDelay = 2000;
           const introTimer = window.setTimeout(() => {
+            console.log('[Game] intro done -> playing');
             setPhase('playing');
             setSubtitle('');
 
-            const engine = new LevelEngine(
-              cfg,
-              {
-                onFail: (reason) => {
-                  setLevelResult('fail');
-                  setFailReason(reason);
-                  setPhase('ended');
-                  api.postResult('fail', cfg.id, cfg.signature).catch(() => {});
-                },
-                onSuccess: () => {
-                  setLevelResult('success');
-                  setPhase('ended');
-                  api.postResult('success', cfg.id, cfg.signature).catch(() => {});
-                },
-                onSubtitle: setSubtitle,
-                onProgress: setProgress,
-                onEventIndex: (index) => setDevEventIndex(index),
-                onStateChange: (state) => setDevEngineState(state),
-                onEventLog: (entry) =>
-                  setDevEventLog((prev) => [...prev, entry]),
+            const engine = new LevelRunner({
+              onFail: (reason) => {
+                console.log('[Game] engine fail', { reason });
+                setLevelResult('fail');
+                setFailReason(reason);
+                setPhase('ended');
+                api.postResult('fail', cfg.id, cfg.signature).catch(() => {});
               },
-              isDevUser ? { enabled: true, stepMode: devStepMode } : undefined
-            );
+              onSuccess: () => {
+                console.log('[Game] engine success');
+                setLevelResult('success');
+                setPhase('ended');
+                api.postResult('success', cfg.id, cfg.signature).catch(() => {});
+              },
+              onProgress: setProgress,
+              onRenderModel: (m) => {
+                setRenderModel(m);
+                setSubtitle(m.subtitle);
+                if (isDevUser) setDevDebugSnap(engineRef.current?.getDebugSnapshot() ?? null);
+              },
+              onStateChange: (state) => setDevEngineState(state),
+              onEventLog: (entry) => {
+                setDevEventLog((prev) => [...prev, entry]);
+                if (isDevUser) setDevDebugSnap(engineRef.current?.getDebugSnapshot() ?? null);
+              },
+            });
 
             engineRef.current = engine;
-            engine.start();
+            void engine.load(cfg).then(async () => {
+              console.log('[Game] engine.load ok');
+              // New engine owns its own audio preload
+              console.log('[Game] engine.preload start');
+              await engine.preload();
+              console.log('[Game] engine.preload end');
+              console.log('[Game] engine.start');
+              engine.start();
+            });
           }, introDelay);
 
           return () => clearTimeout(introTimer);
         })
         .catch((err) => {
+          console.log('[Game] getLevel failed', err);
           setError(
             err instanceof Error ? err.message : 'Neznámá chyba při načítání levelu.'
           );
@@ -119,14 +134,12 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
     if (!engineRef.current) return;
 
     const shouldBeActive = phase === 'playing' && !showPauseMenu;
-    if (shouldBeActive) {
-      engineRef.current.attachInputListeners();
-    } else {
-      engineRef.current.detachInputListeners();
-    }
+    // New input listeners live outside engine; we simply pause engine updates here.
+    if (shouldBeActive && devEngineState === 'paused') engineRef.current.resume();
+    if (!shouldBeActive && devEngineState === 'running') engineRef.current.pause();
 
     return () => {
-      engineRef.current?.detachInputListeners();
+      // no-op
     };
   }, [phase, showPauseMenu]);
 
@@ -141,6 +154,7 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
 
       // Intercept before InputSystem sees it
       e.stopImmediatePropagation();
+      console.log('[Game] DEV KeyX pressed', { devEngineState, phase });
 
       if (devEngineState === 'running') {
         engineRef.current?.pause();
@@ -152,6 +166,66 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
     window.addEventListener('keydown', handleKey, { capture: true });
     return () => window.removeEventListener('keydown', handleKey, true);
   }, [isDevUser, phase, devEngineState]);
+
+  // ── Global input → engine (playing only) ───────────────────────
+  useEffect(() => {
+    if (phase !== 'playing') return;
+
+    const shouldIgnore = (target: EventTarget | null): boolean => {
+      const el = target as HTMLElement | null;
+      if (!el) return false;
+      return !!el.closest?.('[data-no-game-input]');
+    };
+
+    const onClick = (e: MouseEvent) => {
+      if (shouldIgnore(e.target)) return;
+      const el = e.target as HTMLElement | null;
+      const layerId = el?.closest?.('[data-layer-id]')?.getAttribute?.('data-layer-id') ?? undefined;
+      // Send click to engine even without layerId (rules need it); traps check layerId internally
+      engineRef.current?.onInput({ type: 'click', timestamp: Date.now(), targetLayerId: layerId, raw: e });
+    };
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (shouldIgnore(e.target)) return;
+      engineRef.current?.onInput({ type: 'keyboard', timestamp: Date.now(), keyCode: e.code, raw: e });
+    };
+
+    const onScroll = (e: Event) => {
+      if (shouldIgnore(e.target)) return;
+      engineRef.current?.onInput({ type: 'scroll', timestamp: Date.now(), raw: e });
+    };
+
+    const onTouch = (e: TouchEvent) => {
+      if (shouldIgnore(e.target)) return;
+      engineRef.current?.onInput({ type: 'touch', timestamp: Date.now(), raw: e });
+    };
+
+    // Mousemove grace period (800ms) — don't fail immediately on first mouse movement
+    let mouseActive = false;
+    const graceTimer = window.setTimeout(() => { mouseActive = true; }, 800);
+
+    const onMove = (e: MouseEvent) => {
+      if (!mouseActive) return;
+      if (shouldIgnore(e.target)) return;
+      engineRef.current?.onInput({ type: 'mouseMove', timestamp: Date.now(), raw: e });
+    };
+
+    // passive listeners to avoid perf issues
+    document.addEventListener('click', onClick, { passive: true });
+    document.addEventListener('keydown', onKeyDown, { passive: true });
+    document.addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener('touchstart', onTouch, { passive: true });
+    document.addEventListener('mousemove', onMove, { passive: true });
+
+    return () => {
+      clearTimeout(graceTimer);
+      document.removeEventListener('click', onClick);
+      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('scroll', onScroll);
+      document.removeEventListener('touchstart', onTouch);
+      document.removeEventListener('mousemove', onMove);
+    };
+  }, [phase]);
 
   // ── Auto-logout countdown (PLAYER only) ──────────────────────
   useEffect(() => {
@@ -174,15 +248,16 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
   // ── DEV handlers ───────────────────────────────────────────────
   const handleDevResume = () => engineRef.current?.resume();
   const handleDevRestart = () => loadLevel(config?.id ?? user.level);
-  const handleDevNextEvent = () => engineRef.current?.nextEvent();
-  const handleDevSkipToEnd = () => engineRef.current?.skipToEnd();
+  const handleDevNextEvent = () => {};
+  const handleDevSkipToEnd = () => {};
   const handleDevResetLevel = () => {
-    engineRef.current?.resetLevel();
     setPhase('playing');
     setSubtitle('');
     setProgress(0);
     setLevelResult(null);
   };
+  const handleDevRestartEngine = () => engineRef.current?.restart();
+  const handleDevSkipEngine = () => engineRef.current?.skipSuccess();
   const handleDevJumpLevel = () => {
     if (devLevelSelect >= 1) {
       engineRef.current?.stop();
@@ -325,6 +400,32 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
 
       {subtitle && <p style={styles.subtitle}>{subtitle}</p>}
 
+      {/* Action-based layers (render model) */}
+      {renderModel && (
+        <div style={styles.layerRoot}>
+          {renderModel.layers.map((layer) => (
+            <div
+              key={layer.id}
+              data-layer-id={layer.id}
+              style={{
+                ...styles.layerBase,
+                ...(layer.props?.position ? positionToStyle(layer.props.position) : {}),
+                zIndex: 100 + (layer.props?.z ?? 0),
+                pointerEvents: layer.props?.interactive ? 'auto' : 'none',
+                display: layer.props?.visible === false ? 'none' : 'block',
+              }}
+            >
+              {layer.props?.text}
+            </div>
+          ))}
+
+          {/* Effects (minimal) */}
+          {renderModel.effects['invert'] && <div style={styles.effectInvert} />}
+          {renderModel.effects['blur'] && <div style={styles.effectBlur} />}
+          {renderModel.effects['glitch'] && <div style={styles.effectGlitch} />}
+        </div>
+      )}
+
       <div style={styles.progressBar}>
         <div style={{ ...styles.progressFill, width: `${progress * 100}%` }} />
       </div>
@@ -340,8 +441,8 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
             </div>
 
             <p style={styles.pauseInfo}>
-              Level: {config?.id} &nbsp;|&nbsp; Event: {devEventIndex}/
-              {config?.events.length ?? 0} &nbsp;|&nbsp;
+              Level: {config?.id} &nbsp;|&nbsp; Events: {devEventLog.length}
+              &nbsp;|&nbsp;
               {Math.round(progress * 100)}%
             </p>
 
@@ -352,6 +453,12 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
               </button>
               <button style={styles.pauseBtn} onClick={handleDevRestart}>
                 ↻ RESTART
+              </button>
+              <button style={styles.pauseBtn} onClick={handleDevRestartEngine}>
+                ⟲ RESTART (ENGINE)
+              </button>
+              <button style={styles.pauseBtn} onClick={handleDevSkipEngine}>
+                ✅ SKIP (SUCCESS)
               </button>
             </div>
 
@@ -413,13 +520,66 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
               )}
               {devEventLog.map((entry, i) => (
                 <div key={i} style={styles.pauseLogEntry}>
-                  <span style={{ color: '#666' }}>#{entry.index}&nbsp;</span>
-                  <span style={{ color: '#4ade80' }}>[{entry.type}]</span>
-                  {entry.text && (
-                    <span style={{ color: '#94a3b8' }}>&nbsp;"{entry.text}"</span>
-                  )}
+                  <span style={{ color: '#666' }}>{Math.round(entry.t)}ms&nbsp;</span>
+                  <span style={{ color: '#4ade80' }}>[{entry.kind}]</span>
+                  <span style={{ color: '#94a3b8' }}>&nbsp;{entry.msg}</span>
                 </div>
               ))}
+            </div>
+
+            <div style={styles.divider} />
+
+            <p style={styles.sectionLabel}>ENGINE INSPECTOR</p>
+            <div style={styles.pauseLog}>
+              {devDebugSnap?.scheduler && (
+                <div style={styles.pauseLogEntry}>
+                  <span style={{ color: '#94a3b8' }}>
+                    pc={devDebugSnap.scheduler.pc} jumps={devDebugSnap.scheduler.jumpCount} waiting={devDebugSnap.scheduler.waiting?.kind}
+                  </span>
+                </div>
+              )}
+              {devDebugSnap?.scheduler?.waiting?.kind === 'when' && (
+                <div style={styles.pauseLogEntry}>
+                  <span style={{ color: '#94a3b8' }}>
+                    when: {JSON.stringify(devDebugSnap.scheduler.waiting.when)}
+                  </span>
+                </div>
+              )}
+              {devDebugSnap?.rules && (
+                <div style={styles.pauseLogEntry}>
+                  <span style={{ color: '#94a3b8' }}>
+                    rules: click={devDebugSnap.rules.click} mouseMove={devDebugSnap.rules.mouseMove} keyboard={devDebugSnap.rules.keyboard} scroll={devDebugSnap.rules.scroll} touch={devDebugSnap.rules.touch}
+                  </span>
+                </div>
+              )}
+              {devDebugSnap?.traps && (
+                <div style={styles.pauseLogEntry}>
+                  <span style={{ color: '#94a3b8' }}>
+                    traps: {devDebugSnap.traps.filter((t: any) => t.enabled).length}/{devDebugSnap.traps.length} enabled
+                  </span>
+                </div>
+              )}
+              {devDebugSnap?.effects && (
+                <div style={styles.pauseLogEntry}>
+                  <span style={{ color: '#94a3b8' }}>
+                    effects: {Object.keys(devDebugSnap.effects).join(', ') || '(none)'}
+                  </span>
+                </div>
+              )}
+              {devDebugSnap?.vars && (
+                <div style={styles.pauseLogEntry}>
+                  <span style={{ color: '#94a3b8' }}>
+                    vars: {Object.keys(devDebugSnap.vars).length}
+                  </span>
+                </div>
+              )}
+              {devDebugSnap?.scheduler?.steps && (
+                <div style={styles.pauseLogEntry}>
+                  <span style={{ color: '#666' }}>
+                    timeline: {devDebugSnap.scheduler.steps.length} steps
+                  </span>
+                </div>
+              )}
             </div>
 
             <div style={styles.divider} />
@@ -706,4 +866,61 @@ const styles: Record<string, React.CSSProperties> = {
   pauseLogEntry: {
     lineHeight: '1.6',
   },
+  layerRoot: {
+    position: 'absolute',
+    inset: 0,
+    pointerEvents: 'none',
+  },
+  layerBase: {
+    position: 'absolute',
+    padding: '10px 12px',
+    borderRadius: '10px',
+    background: 'rgba(0,0,0,0.65)',
+    border: '1px solid rgba(255,255,255,0.08)',
+    color: '#e5e7eb',
+    fontSize: '14px',
+    maxWidth: '420px',
+  },
+  effectInvert: {
+    position: 'absolute',
+    inset: 0,
+    background: 'rgba(255,255,255,0.0)',
+    mixBlendMode: 'difference',
+    pointerEvents: 'none',
+  },
+  effectBlur: {
+    position: 'absolute',
+    inset: 0,
+    backdropFilter: 'blur(4px)',
+    pointerEvents: 'none',
+  },
+  effectGlitch: {
+    position: 'absolute',
+    inset: 0,
+    background:
+      'repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 3px)',
+    opacity: 0.6,
+    pointerEvents: 'none',
+  },
 };
+
+function positionToStyle(
+  pos:
+    | 'center'
+    | 'top'
+    | 'topRight'
+    | 'topLeft'
+    | 'bottom'
+    | 'bottomRight'
+    | 'bottomLeft'
+): React.CSSProperties {
+  const base: React.CSSProperties = {};
+  if (pos === 'center') return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
+  if (pos === 'top') return { top: '16px', left: '50%', transform: 'translateX(-50%)' };
+  if (pos === 'topRight') return { top: '16px', right: '16px' };
+  if (pos === 'topLeft') return { top: '16px', left: '16px' };
+  if (pos === 'bottom') return { bottom: '16px', left: '50%', transform: 'translateX(-50%)' };
+  if (pos === 'bottomRight') return { bottom: '16px', right: '16px' };
+  if (pos === 'bottomLeft') return { bottom: '16px', left: '16px' };
+  return base;
+}

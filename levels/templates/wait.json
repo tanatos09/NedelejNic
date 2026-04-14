@@ -1,0 +1,13 @@
+{
+  "id": 1001,
+  "type": "action",
+  "title": "Wait",
+  "assets": { "voices": [], "music": [], "sounds": [] },
+  "rules": { "click": "forbidden", "mouseMove": "forbidden", "keyboard": "forbidden", "scroll": "forbidden", "touch": "forbidden" },
+  "end": { "type": "timer", "time": 10 },
+  "timeline": [
+    { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Nedělej nic. 10 sekund." },
+    { "at": "10s", "do": "level.end", "result": "success" }
+  ]
+}
+

@@ -1,0 +1,32 @@
+{
+  "id": 19,
+  "type": "action",
+  "title": "19 Opposite Rules",
+  "assets": { "voices": [], "music": [], "sounds": [] },
+  "rules": { "click": "forbidden", "mouseMove": "allowed", "keyboard": "allowed", "scroll": "allowed", "touch": "allowed" },
+  "end": { "type": "timer", "time": 16 },
+  "timeline": [
+    { "at": "0s", "do": "state.set", "key": "clickedInWindow", "value": 0 },
+    { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Pravidla se otočí. 6–8s musíš kliknout." },
+
+    { "at": "5.8s", "do": "rules.set", "rules": { "click": "allowed" } },
+    {
+      "at": "5.8s",
+      "do": "trap.set",
+      "id": "t_click_window",
+      "enabled": true,
+      "kind": "timeWindow",
+      "match": { "start": "6s", "end": "8s", "input": "click" },
+      "result": { "type": "setVar", "key": "clickedInWindow", "value": 1 }
+    },
+    { "at": "8.1s", "do": "rules.set", "rules": { "click": "forbidden" } },
+
+    { "at": "15s", "do": "flow.branch", "if": { "var": "clickedInWindow", "op": "eq", "value": 1 }, "then": "OK", "else": "BAD" },
+    { "label": "OK" },
+    { "do": "text.set", "slot": "subtitle", "text": "Kliknul jsi ve správný čas." },
+    { "do": "level.end", "result": "success" },
+    { "label": "BAD" },
+    { "do": "level.end", "result": "fail", "reason": "Neotočil jsi pravidla ve své hlavě." }
+  ]
+}
+

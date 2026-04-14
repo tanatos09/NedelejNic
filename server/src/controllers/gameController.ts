@@ -35,8 +35,15 @@ export async function getLevel(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  const config = getLevelConfig(levelId);
-  const signature = signLevel(config.id, config.end.time, req.user.userId);
+  let config;
+  try {
+    config = getLevelConfig(levelId);
+  } catch (e: unknown) {
+    res.status(404).json({ error: e instanceof Error ? e.message : 'Level nenalezen.' });
+    return;
+  }
+  const endTime = config.end?.time ?? 0;
+  const signature = signLevel(config.id, endTime, req.user.userId);
   res.json({ ...config, signature });
 }
 
@@ -84,8 +91,15 @@ export async function postResult(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  const config = getLevelConfig(levelId);
-  const expected = signLevel(config.id, config.end.time, req.user.userId);
+  let config;
+  try {
+    config = getLevelConfig(levelId);
+  } catch (e: unknown) {
+    res.status(404).json({ error: e instanceof Error ? e.message : 'Level nenalezen.' });
+    return;
+  }
+  const endTime = config.end?.time ?? 0;
+  const expected = signLevel(config.id, endTime, req.user.userId);
   if (signature !== expected) {
     res.status(403).json({ error: 'Neplatný podpis.' });
     return;

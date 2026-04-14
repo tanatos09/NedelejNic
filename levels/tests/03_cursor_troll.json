@@ -1,0 +1,31 @@
+{
+  "id": 3,
+  "type": "action",
+  "title": "03 Cursor Troll",
+  "assets": { "voices": [], "music": [], "sounds": [] },
+  "rules": {
+    "click": "allowed",
+    "mouseMove": "allowed",
+    "keyboard": "allowed",
+    "scroll": "allowed",
+    "touch": "allowed"
+  },
+  "end": { "type": "timer", "time": 12 },
+  "timeline": [
+    { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Kurzoru se nebude líbit, že existuješ." },
+    {
+      "at": "0.5s",
+      "do": "ui.layer",
+      "op": "add",
+      "id": "fake_cursor",
+      "type": "cursor",
+      "props": { "text": "⟂", "interactive": false, "position": "topLeft", "variant": "neutral", "z": 50 }
+    },
+    { "at": "1s", "do": "effect.start", "type": "jitter", "intensity": 0.9, "durationMs": 2500 },
+    { "at": "3.8s", "do": "effect.start", "type": "shake", "intensity": 0.7, "durationMs": 700 },
+    { "at": "5s", "do": "text.set", "slot": "subtitle", "text": "To bylo jen zahřátí." },
+    { "at": "6s", "do": "effect.start", "type": "jitter", "intensity": 1, "durationMs": 1800 },
+    { "at": "12s", "do": "level.end", "result": "success" }
+  ]
+}
+

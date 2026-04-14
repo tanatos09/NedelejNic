@@ -1,7 +1,9 @@
 import type { LevelRules } from '../types';
+import type { InputEvent } from './newEngine/types';
 
 export interface InputHandler {
   onFail: (reason: string) => void;
+  onInput?: (evt: InputEvent) => void;
 }
 
 /**
@@ -63,6 +65,7 @@ export class InputSystem {
           const target = e.target as HTMLElement;
           if (target?.closest('[data-no-game-input]')) return;
 
+          this.handler.onInput?.(this.normalize(e));
           if (this.mouseActive) {
             this.handler.onFail(msg);
           }
@@ -83,6 +86,8 @@ export class InputSystem {
           const target = e.target as HTMLElement;
           if (target?.closest('[data-no-game-input]')) return;
 
+          const normalized = this.normalize(e);
+          this.handler.onInput?.(normalized);
           this.handler.onFail(msg);
         }) as EventListener;
 
@@ -126,5 +131,26 @@ export class InputSystem {
    */
   resetMouseActivity(): void {
     this.mouseActive = false;
+  }
+
+  private normalize(e: Event): InputEvent {
+    const timestamp = Date.now();
+    const target = e.target as HTMLElement | null;
+    const targetLayerId = target?.closest?.('[data-layer-id]')?.getAttribute?.('data-layer-id') ?? undefined;
+
+    if (e.type === 'click') {
+      return { type: 'click', timestamp, targetLayerId: targetLayerId ?? undefined, raw: e };
+    }
+    if (e.type === 'mousemove') {
+      return { type: 'mouseMove', timestamp, raw: e };
+    }
+    if (e.type === 'keydown') {
+      const ke = e as KeyboardEvent;
+      return { type: 'keyboard', timestamp, keyCode: ke.code, raw: e };
+    }
+    if (e.type === 'scroll') {
+      return { type: 'scroll', timestamp, raw: e };
+    }
+    return { type: 'touch', timestamp, raw: e };
   }
 }

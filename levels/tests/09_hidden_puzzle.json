@@ -1,0 +1,22 @@
+{
+  "id": 9,
+  "type": "action",
+  "title": "09 Hidden Puzzle",
+  "assets": { "voices": [], "music": [], "sounds": [] },
+  "rules": { "click": "allowed", "mouseMove": "allowed", "keyboard": "allowed", "scroll": "allowed", "touch": "allowed" },
+  "end": { "type": "timer", "time": 18 },
+  "timeline": [
+    { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Tajné řešení je: klik, Space, klik (do 3s)." },
+    {
+      "at": "0s",
+      "do": "trap.set",
+      "id": "t_secret",
+      "enabled": true,
+      "kind": "inputPattern",
+      "match": { "sequence": ["click", "Space", "click"], "withinMs": 3000 },
+      "result": { "type": "success" }
+    },
+    { "at": "18s", "do": "level.end", "result": "fail", "reason": "Puzzle nevyřešeno." }
+  ]
+}
+

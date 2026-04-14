@@ -1,0 +1,30 @@
+{
+  "id": 10,
+  "type": "action",
+  "title": "10 Time Trick",
+  "assets": { "voices": [], "music": [], "sounds": [] },
+  "rules": { "click": "allowed", "mouseMove": "allowed", "keyboard": "allowed", "scroll": "allowed", "touch": "allowed" },
+  "end": { "type": "timer", "time": 14 },
+  "timeline": [
+    { "at": "0s", "do": "state.set", "key": "windowHit", "value": 0 },
+    { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Klikni jen mezi 5.0s a 6.0s. Jindy je to špatně." },
+
+    {
+      "at": "0s",
+      "do": "trap.set",
+      "id": "t_window_ok",
+      "enabled": true,
+      "kind": "timeWindow",
+      "match": { "start": "5s", "end": "6s", "input": "click" },
+      "result": { "type": "setVar", "key": "windowHit", "value": 1 }
+    },
+
+    { "at": "13s", "do": "flow.branch", "if": { "var": "windowHit", "op": "eq", "value": 1 }, "then": "OK", "else": "NO" },
+    { "label": "OK" },
+    { "do": "text.set", "slot": "subtitle", "text": "Dobře načasováno." },
+    { "do": "level.end", "result": "success" },
+    { "label": "NO" },
+    { "do": "level.end", "result": "fail", "reason": "Neudělal jsi to v okně." }
+  ]
+}
+

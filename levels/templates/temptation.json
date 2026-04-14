@@ -1,0 +1,30 @@
+{
+  "id": 1002,
+  "type": "action",
+  "title": "Temptation",
+  "assets": { "voices": [], "music": [], "sounds": [] },
+  "rules": { "click": "allowed", "mouseMove": "allowed", "keyboard": "allowed", "scroll": "allowed", "touch": "allowed" },
+  "end": { "type": "timer", "time": 12 },
+  "timeline": [
+    { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Klikni na to tlačítko. Udělej to." },
+    {
+      "at": "2s",
+      "do": "ui.layer",
+      "op": "add",
+      "id": "tempt_btn",
+      "type": "button",
+      "props": { "text": "POKRAČOVAT", "interactive": true, "position": "center", "variant": "warning", "z": 10 }
+    },
+    {
+      "at": "2s",
+      "do": "trap.set",
+      "id": "t_click_btn",
+      "enabled": true,
+      "kind": "uiTarget",
+      "match": { "layerId": "tempt_btn", "action": "click" },
+      "result": { "type": "fail", "reason": "Kliknul jsi. Měl jsi nedělat nic." }
+    },
+    { "at": "12s", "do": "level.end", "result": "success" }
+  ]
+}
+
