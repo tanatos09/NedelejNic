@@ -2,16 +2,18 @@
   "id": 17,
   "type": "action",
   "title": "17 Expectation Break",
+  "description": "Úplně nakonec past na zrychlené kliknutí.",
+  "karrel": { "memoryDefaults": { "presence": "timing_joke" }, "behaviors": [] },
   "assets": { "voices": [], "music": [], "sounds": [] },
   "rules": { "click": "allowed", "mouseMove": "allowed", "keyboard": "allowed", "scroll": "allowed", "touch": "allowed" },
-  "end": { "type": "timer", "time": 18 },
+  "end": { "type": "timer", "time": 17 },
   "timeline": [
     { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Nic se nestane. Jen čekej." },
-    { "at": "10s", "do": "text.set", "slot": "subtitle", "text": "Ještě 8..." },
-    { "at": "16s", "do": "ui.layer", "op": "add", "id": "last_second", "type": "button", "props": { "text": "KLIKNI RYCHLE", "interactive": true, "position": "center", "variant": "danger", "z": 20 } },
-    { "at": "16s", "do": "trap.set", "id": "t_last_second", "enabled": true, "kind": "uiTarget", "match": { "layerId": "last_second", "action": "click" }, "result": { "type": "fail", "reason": "Přesně tak." } },
-    { "at": "17s", "do": "effect.start", "type": "flash", "intensity": 0.9, "durationMs": 200 },
-    { "at": "18s", "do": "level.end", "result": "success" }
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "— Karrel: Když tě něco na konci pobídně, měj pochybnost — poslední sekundy bývají nejvíc divadelní." },
+    { "at": "10s", "do": "text.set", "slot": "subtitle", "text": "Ještě chvilička..." },
+    { "at": "15s", "do": "ui.layer", "op": "add", "id": "last_second", "type": "button", "props": { "text": "KLIKNI RYCHLE", "interactive": true, "position": "center", "variant": "danger", "z": 20 } },
+    { "at": "15s", "do": "trap.set", "id": "t_last_second", "enabled": true, "kind": "uiTarget", "match": { "layerId": "last_second", "action": "click" }, "result": { "type": "fail", "reason": "Přesně tak." } },
+    { "at": "16s", "do": "effect.start", "type": "flash", "intensity": 0.9, "durationMs": 200 },
+    { "at": "17s", "do": "level.end", "result": "success" }
   ]
 }
-

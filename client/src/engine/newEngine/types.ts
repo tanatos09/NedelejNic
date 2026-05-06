@@ -3,7 +3,21 @@ import type { LegacyLevelConfig } from '../../legacyTypes';
 
 export type EngineState = 'idle' | 'running' | 'paused' | 'ended';
 
-export type InputEventType = 'click' | 'mouseMove' | 'keyboard' | 'scroll' | 'touch';
+export type InputEventType =
+  | 'click'
+  | 'mouseMove'
+  | 'mouseDown'
+  | 'mouseUp'
+  | 'wheel'
+  | 'keyboard'
+  | 'keyUp'
+  | 'scroll'
+  | 'touch'
+  | 'touchMove'
+  | 'touchEnd'
+  | 'focus'
+  | 'blur'
+  | 'visibility';
 
 export type InputEvent = {
   type: InputEventType;
@@ -14,6 +28,20 @@ export type InputEvent = {
   raw: unknown;
   /** For keyboard input */
   keyCode?: string;
+  /** Pointer/mouse location (client coordinates) */
+  x?: number;
+  y?: number;
+  /** Pointer delta since last sampled event */
+  dx?: number;
+  dy?: number;
+  /** Mouse buttons (DOM MouseEvent.buttons) and button (DOM MouseEvent.button) */
+  buttons?: number;
+  button?: number;
+  /** Wheel delta (DOM WheelEvent.deltaX/Y) */
+  deltaX?: number;
+  deltaY?: number;
+  /** Document visibility state at event time */
+  visibilityState?: DocumentVisibilityState;
 };
 
 export type RuleMode = 'forbidden' | 'allowed' | 'required';
@@ -28,6 +56,7 @@ export type Action =
   | { do: 'ui.layer'; op: 'add' | 'update' | 'remove'; id: string; type: 'toast' | 'modal' | 'button' | 'overlay' | 'hud' | 'noise' | 'cursor' | 'image'; props?: { text?: string; visible?: boolean; interactive?: boolean; variant?: 'neutral' | 'warning' | 'danger' | 'success'; position?: 'center' | 'top' | 'topRight' | 'topLeft' | 'bottom' | 'bottomRight' | 'bottomLeft'; z?: number } }
   | { do: 'effect.start'; type: 'glitch' | 'blur' | 'invert' | 'flash' | 'shake' | 'jitter'; intensity?: number; durationMs?: number; target?: string }
   | { do: 'effect.stop'; type: 'glitch' | 'blur' | 'invert' | 'flash' | 'shake' | 'jitter'; target?: string }
+  | { do: 'hook.run'; name: string; params?: unknown }
   | { do: 'rules.set'; rules: Partial<Rules> }
   | { do: 'trap.set'; id: string; enabled: boolean; kind: 'uiTarget' | 'inputPattern' | 'timeWindow'; match: unknown; result: { type: 'fail' | 'success' | 'setVar'; reason?: string; key?: string; value?: number } }
   | { do: 'state.set'; key: string; value: number | string }
@@ -35,6 +64,7 @@ export type Action =
   | { do: 'flow.goto'; label: string }
   | { do: 'flow.branch'; if: { var: string; op: 'eq' | 'gte' | 'lte'; value: number | string }; then: string; else: string }
   | { do: 'flow.random'; choices: string[]; seedKey?: string }
+  | { do: 'fail'; severity: 'endLevel' | 'penalty' | 'flag'; reason: string; key?: string }
   | { do: 'level.end'; result: 'success' | 'fail'; reason?: string };
 
 export type TimelineStep =

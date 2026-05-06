@@ -2,11 +2,14 @@
   "id": 11,
   "type": "action",
   "title": "11 Fake UI",
+  "description": "Modal past a kontrast tipu — odolat OK.",
+  "karrel": { "memoryDefaults": { "presence": "gentle_irony" }, "behaviors": [] },
   "assets": { "voices": [], "music": [], "sounds": [] },
   "rules": { "click": "allowed", "mouseMove": "allowed", "keyboard": "allowed", "scroll": "allowed", "touch": "allowed" },
-  "end": { "type": "timer", "time": 16 },
+  "end": { "type": "timer", "time": 14 },
   "timeline": [
     { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Zavři okno. (Nezavírej okno.)" },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "— Karrel: Okna, která chtějí potvrzení, často chtějí jen tvou pozornost — ne nutně tvůj souhlas." },
     {
       "at": "1s",
       "do": "ui.layer",
@@ -33,14 +36,13 @@
       "result": { "type": "fail", "reason": "Kliknul jsi na OK. Samozřejmě." }
     },
     {
-      "at": "7s",
+      "at": "5.5s",
       "do": "ui.layer",
       "op": "add",
       "id": "toast_tip",
       "type": "toast",
       "props": { "text": "Tip: neklikej", "interactive": false, "position": "top", "variant": "neutral", "z": 5 }
     },
-    { "at": "16s", "do": "level.end", "result": "success" }
+    { "at": "14s", "do": "level.end", "result": "success" }
   ]
 }
-

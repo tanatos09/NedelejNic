@@ -2,6 +2,8 @@
   "id": 3,
   "type": "action",
   "title": "03 Cursor Troll",
+  "description": "Falešný kurzor a jitter — odolat zbytečné interakci.",
+  "karrel": { "memoryDefaults": { "presence": "amused" }, "behaviors": [] },
   "assets": { "voices": [], "music": [], "sounds": [] },
   "rules": {
     "click": "allowed",
@@ -10,9 +12,10 @@
     "scroll": "allowed",
     "touch": "allowed"
   },
-  "end": { "type": "timer", "time": 12 },
+  "end": { "type": "timer", "time": 11 },
   "timeline": [
     { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Kurzoru se nebude líbit, že existuješ." },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "— Karrel: Když obrazovka tančí, tvůj kurzor může zůstat obyčejný — to je docela hezký kontrast." },
     {
       "at": "0.5s",
       "do": "ui.layer",
@@ -21,11 +24,10 @@
       "type": "cursor",
       "props": { "text": "⟂", "interactive": false, "position": "topLeft", "variant": "neutral", "z": 50 }
     },
-    { "at": "1s", "do": "effect.start", "type": "jitter", "intensity": 0.9, "durationMs": 2500 },
-    { "at": "3.8s", "do": "effect.start", "type": "shake", "intensity": 0.7, "durationMs": 700 },
-    { "at": "5s", "do": "text.set", "slot": "subtitle", "text": "To bylo jen zahřátí." },
-    { "at": "6s", "do": "effect.start", "type": "jitter", "intensity": 1, "durationMs": 1800 },
-    { "at": "12s", "do": "level.end", "result": "success" }
+    { "at": "1s", "do": "effect.start", "type": "jitter", "intensity": 0.95, "durationMs": 2600 },
+    { "at": "3.5s", "do": "effect.start", "type": "shake", "intensity": 0.75, "durationMs": 750 },
+    { "at": "4.6s", "do": "text.set", "slot": "subtitle", "text": "To bylo jen zahřátí." },
+    { "at": "5.5s", "do": "effect.start", "type": "jitter", "intensity": 1, "durationMs": 2000 },
+    { "at": "11s", "do": "level.end", "result": "success" }
   ]
 }
-

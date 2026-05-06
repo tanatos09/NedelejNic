@@ -2,18 +2,20 @@
   "id": 13,
   "type": "action",
   "title": "13 Meta",
+  "description": "Parodie na ladící panel — neklikej na opravu.",
+  "karrel": { "memoryDefaults": { "presence": "meta_observer" }, "behaviors": [] },
   "assets": { "voices": [], "music": [], "sounds": [] },
   "rules": { "click": "allowed", "mouseMove": "allowed", "keyboard": "allowed", "scroll": "allowed", "touch": "allowed" },
-  "end": { "type": "timer", "time": 16 },
+  "end": { "type": "timer", "time": 14 },
   "timeline": [
     { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "ENGINE DEBUG: načítám realitu..." },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "— Karrel: Když něco vypadá jako konzole, občas je to jen kostým pro starosti." },
     { "at": "0.5s", "do": "ui.layer", "op": "add", "id": "dbg", "type": "modal", "props": { "text": "DEV PANEL (fake)\n- fps: 999\n- sanity: 0", "interactive": false, "position": "center", "variant": "neutral", "z": 10 } },
-    { "at": "3s", "do": "effect.start", "type": "glitch", "intensity": 0.6, "durationMs": 900 },
-    { "at": "5s", "do": "ui.layer", "op": "add", "id": "dbg_toast", "type": "toast", "props": { "text": "Warning: user detected", "interactive": false, "position": "topRight", "variant": "warning", "z": 5 } },
-    { "at": "9s", "do": "text.set", "slot": "subtitle", "text": "Zkus kliknout na DEBUG. Nic se nestane." },
-    { "at": "12s", "do": "ui.layer", "op": "add", "id": "fake_btn", "type": "button", "props": { "text": "FIX ENGINE", "interactive": true, "position": "bottomRight", "variant": "danger", "z": 12 } },
-    { "at": "12s", "do": "trap.set", "id": "t_fix", "enabled": true, "kind": "uiTarget", "match": { "layerId": "fake_btn", "action": "click" }, "result": { "type": "fail", "reason": "Engine se neopravuje klikáním." } },
-    { "at": "16s", "do": "level.end", "result": "success" }
+    { "at": "2.6s", "do": "effect.start", "type": "glitch", "intensity": 0.6, "durationMs": 850 },
+    { "at": "4.2s", "do": "ui.layer", "op": "add", "id": "dbg_toast", "type": "toast", "props": { "text": "Warning: user detected", "interactive": false, "position": "topRight", "variant": "warning", "z": 5 } },
+    { "at": "7.5s", "do": "text.set", "slot": "subtitle", "text": "Zkus kliknout na DEBUG. Nic se nestane." },
+    { "at": "10s", "do": "ui.layer", "op": "add", "id": "fake_btn", "type": "button", "props": { "text": "FIX ENGINE", "interactive": true, "position": "bottomRight", "variant": "danger", "z": 12 } },
+    { "at": "10s", "do": "trap.set", "id": "t_fix", "enabled": true, "kind": "uiTarget", "match": { "layerId": "fake_btn", "action": "click" }, "result": { "type": "fail", "reason": "Engine se neopravuje klikáním." } },
+    { "at": "14s", "do": "level.end", "result": "success" }
   ]
 }
-

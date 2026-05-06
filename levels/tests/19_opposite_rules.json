@@ -2,26 +2,29 @@
   "id": 19,
   "type": "action",
   "title": "19 Opposite Rules",
+  "description": "Krátké okénko s povoleným kliknutím uprostřed levelu.",
+  "karrel": { "memoryDefaults": { "presence": "timing_coach" }, "behaviors": [] },
   "assets": { "voices": [], "music": [], "sounds": [] },
   "rules": { "click": "forbidden", "mouseMove": "allowed", "keyboard": "allowed", "scroll": "allowed", "touch": "allowed" },
-  "end": { "type": "timer", "time": 16 },
+  "end": { "type": "timer", "time": 15 },
   "timeline": [
     { "at": "0s", "do": "state.set", "key": "clickedInWindow", "value": 0 },
-    { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Pravidla se otočí. 6–8s musíš kliknout." },
+    { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Pravidla se otočí. Mezi 6.2 s a 7.9 s musíš kliknout." },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "— Karrel: Chvilková výjimka od zákazu — jako když se na sekundu otevře okénko vzduchu." },
 
-    { "at": "5.8s", "do": "rules.set", "rules": { "click": "allowed" } },
+    { "at": "5.9s", "do": "rules.set", "rules": { "click": "allowed" } },
     {
-      "at": "5.8s",
+      "at": "5.9s",
       "do": "trap.set",
       "id": "t_click_window",
       "enabled": true,
       "kind": "timeWindow",
-      "match": { "start": "6s", "end": "8s", "input": "click" },
+      "match": { "start": "6.2s", "end": "7.9s", "input": "click" },
       "result": { "type": "setVar", "key": "clickedInWindow", "value": 1 }
     },
-    { "at": "8.1s", "do": "rules.set", "rules": { "click": "forbidden" } },
+    { "at": "8.05s", "do": "rules.set", "rules": { "click": "forbidden" } },
 
-    { "at": "15s", "do": "flow.branch", "if": { "var": "clickedInWindow", "op": "eq", "value": 1 }, "then": "OK", "else": "BAD" },
+    { "at": "14s", "do": "flow.branch", "if": { "var": "clickedInWindow", "op": "eq", "value": 1 }, "then": "OK", "else": "BAD" },
     { "label": "OK" },
     { "do": "text.set", "slot": "subtitle", "text": "Kliknul jsi ve správný čas." },
     { "do": "level.end", "result": "success" },
@@ -29,4 +32,3 @@
     { "do": "level.end", "result": "fail", "reason": "Neotočil jsi pravidla ve své hlavě." }
   ]
 }
-

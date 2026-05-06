@@ -2,11 +2,14 @@
   "id": 1003,
   "type": "action",
   "title": "Chaos",
+  "description": "Šablona: vizuální efekty a šum, hráč dílí pozornost.",
+  "karrel": { "memoryDefaults": { "presence": "steady" }, "behaviors": [] },
   "assets": { "voices": [], "music": [], "sounds": [] },
   "rules": { "click": "allowed", "mouseMove": "allowed", "keyboard": "allowed", "scroll": "allowed", "touch": "allowed" },
   "end": { "type": "timer", "time": 10 },
   "timeline": [
     { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Teď bude chaos." },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "— Karrel: Chaos je jen obrazovka, která hraje divadlo; ty nemusíš hrát vedle ní." },
     { "at": "1s", "do": "effect.start", "type": "glitch", "intensity": 0.7, "durationMs": 1200 },
     { "at": "2s", "do": "effect.start", "type": "invert", "intensity": 0.8, "durationMs": 800 },
     { "at": "3s", "do": "effect.start", "type": "blur", "intensity": 0.7, "durationMs": 900 },
@@ -21,4 +24,3 @@
     { "at": "10s", "do": "level.end", "result": "success" }
   ]
 }
-

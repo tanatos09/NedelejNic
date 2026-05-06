@@ -48,6 +48,7 @@ export class TimelineScheduler {
     this.jumpCount = 0;
     this.waiting = { kind: 'none' };
     this.ended = false;
+    this.startEpoch = 0;
   }
 
   getDebugState(): {
@@ -68,8 +69,8 @@ export class TimelineScheduler {
     };
   }
 
-  start(): void {
-    this.startEpoch = Date.now();
+  start(atEpochMs?: number): void {
+    this.startEpoch = typeof atEpochMs === 'number' ? atEpochMs : Date.now();
     this.pausedElapsed = 0;
     this.ended = false;
     this.log?.({ t: 0, kind: 'engine', msg: 'scheduler.start', data: { steps: this.steps.length } });
@@ -105,6 +106,7 @@ export class TimelineScheduler {
 
   onInput(input: InputEvent): void {
     if (this.ended) return;
+    if (!this.startEpoch) return;
 
     // Traps always run (even while waiting on when)
     const outcome = this.traps.match(input);
@@ -124,6 +126,8 @@ export class TimelineScheduler {
     }
 
     // Rules fallback: forbidden => fail (required enforcement is authoring-level; we don't auto-fail here)
+    // Only applies to the 5 canonical rule inputs. Extra input types (wheel/focus/visibility, etc.)
+    // are still forwarded for traps/when logic but do not map to rules.
     const ruleKey =
       input.type === 'click'
         ? 'click'
@@ -133,8 +137,10 @@ export class TimelineScheduler {
             ? 'keyboard'
             : input.type === 'scroll'
               ? 'scroll'
-              : 'touch';
-    if (this.state.rules[ruleKey] === 'forbidden') {
+              : input.type === 'touch'
+                ? 'touch'
+                : null;
+    if (ruleKey && this.state.rules[ruleKey] === 'forbidden') {
       const msgMap: Record<string, string> = {
         click: 'Kliknul jsi. Hra skončila.',
         mouseMove: 'Pohnul jsi myší. Hra skončila.',
@@ -162,6 +168,71 @@ export class TimelineScheduler {
         this.waiting = { kind: 'none' };
         this.runLoop();
       }
+    }
+  }
+
+  /** DEV only: execute exactly one actionable step (ignores at/when gating). */
+  debugStepOnce(): { executed: boolean; ended: boolean; pc: number } {
+    if (this.ended) return { executed: false, ended: true, pc: this.pc };
+
+    let guard = 0;
+    while (!this.ended && this.pc < this.steps.length && guard++ < 1000) {
+      const step: any = this.steps[this.pc];
+
+      // Label-only step
+      if (step?.label && !step.do) {
+        this.pc++;
+        continue;
+      }
+
+      const elapsed = this.getElapsedMs();
+
+      // Execute action ignoring at/when (DEV stepping convenience).
+      if (step?.do) {
+        if (step.do === 'flow.random') {
+          const choices = Array.isArray(step.choices) ? step.choices : [];
+          const seedKey = typeof step.seedKey === 'string' ? step.seedKey : 'default';
+          const rng = new RandomSystem(`${this.level.id}:${seedKey}`);
+          const idx = rng.pickIndex(choices.length);
+          const choice = choices[idx] ?? choices[0];
+          this.log?.({ t: elapsed, kind: 'random', msg: 'flow.random', data: { seedKey, choices, idx, choice } });
+          if (choice) {
+            this.gotoLabel(choice);
+            return { executed: true, ended: this.ended, pc: this.pc };
+          }
+          this.pc++;
+          return { executed: true, ended: this.ended, pc: this.pc };
+        }
+
+        const action = step as Action;
+        const r = this.dispatcher.dispatch(action);
+        this.callbacks.onRenderModel(this.state.snapshotRenderModel());
+
+        if (r.end) {
+          this.end(r.end.result, r.end.reason);
+          return { executed: true, ended: this.ended, pc: this.pc };
+        }
+        if (r.gotoLabel) {
+          this.gotoLabel(r.gotoLabel);
+          return { executed: true, ended: this.ended, pc: this.pc };
+        }
+
+        this.pc++;
+        return { executed: true, ended: this.ended, pc: this.pc };
+      }
+
+      this.pc++;
+    }
+
+    return { executed: false, ended: this.ended, pc: this.pc };
+  }
+
+  /** DEV only: run through all remaining steps (ignores at/when). */
+  debugSkipToEnd(): void {
+    let guard = 0;
+    while (!this.ended && this.pc < this.steps.length && guard++ < this.steps.length * 5) {
+      const r = this.debugStepOnce();
+      if (!r.executed) break;
     }
   }
 

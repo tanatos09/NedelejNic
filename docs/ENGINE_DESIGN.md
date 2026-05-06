@@ -2,7 +2,7 @@
 
 Tento dokument je finální refined specifikace univerzálního **action-based** enginu pro hru **Nedělej nic**, doplněná o “hardening” hraničních chování (bez redesignu a bez nových akcí).
 
-Neměnné požadavky projektu (viz `docs/AI_PROJECT_CONTEXT.md`, `docs/ARCHITECTURE.md`, `docs/ENGINE_ANALYSIS.md`):
+Neměnné požadavky projektu (viz `docs/AI_PROJECT_CONTEXT.md`, `docs/ARCHITECTURE.md`, `docs/PROJECT_OVERVIEW.md`):
 - **Levely jsou data-driven** a engine je pouze **interpretuje**.
 - Během fáze **playing** je **0 requestů na server** (a ideálně 0 requestů vůbec).
 - Input je bezpečný: stavově řízený attach/detach + respektuje `data-no-game-input`.
@@ -252,7 +252,7 @@ Zakázáno:
 
 Tento dokument je finální refined specifikace univerzálního **action-based** enginu pro hru **Nedělej nic**, doplněná o “hardening” hraničních chování (bez redesignu a bez nových akcí).
 
-Neměnné požadavky projektu (viz `docs/AI_PROJECT_CONTEXT.md`, `docs/ARCHITECTURE.md`, `docs/ENGINE_ANALYSIS.md`):
+Neměnné požadavky projektu (viz `docs/AI_PROJECT_CONTEXT.md`, `docs/ARCHITECTURE.md`, `docs/PROJECT_OVERVIEW.md`):
 - **Levely jsou data-driven** a engine je pouze **interpretuje**.
 - Během fáze **playing** je **0 requestů na server** (a ideálně 0 requestů vůbec).
 - Input je bezpečný: stavově řízený attach/detach + respektuje `data-no-game-input`.
@@ -634,7 +634,7 @@ Zakázáno:
 Tento dokument je finální refined návrh univerzálního **action-based** enginu pro hru **Nedělej nic**.  
 Cíl: **co nejjednodušší implementovatelný engine** (bez redesignu), který stále pokrývá všechny požadavky a všechny typy levelů kombinací stejných akcí.
 
-Neměnné požadavky projektu (viz `docs/AI_PROJECT_CONTEXT.md`, `docs/ARCHITECTURE.md`, `docs/ENGINE_ANALYSIS.md`):
+Neměnné požadavky projektu (viz `docs/AI_PROJECT_CONTEXT.md`, `docs/ARCHITECTURE.md`, `docs/PROJECT_OVERVIEW.md`):
 - **Levely jsou data-driven** a engine je pouze **interpretuje**.
 - Během fáze **playing** je **0 requestů na server** (a ideálně 0 requestů vůbec).
 - Input je bezpečný: stavově řízený attach/detach + respektuje `data-no-game-input`.
@@ -1095,7 +1095,7 @@ Vše je kompozice stejného action setu:
 
 Tento dokument je **refinement** původního návrhu. Cíl: co nejjednodušší implementovatelný engine, který stále pokrývá všechny popsané schopnosti a 22 typů levelů.
 
-Neměnné požadavky projektu (viz `docs/AI_PROJECT_CONTEXT.md`, `docs/ARCHITECTURE.md`, `docs/ENGINE_ANALYSIS.md`):
+Neměnné požadavky projektu (viz `docs/AI_PROJECT_CONTEXT.md`, `docs/ARCHITECTURE.md`, `docs/PROJECT_OVERVIEW.md`):
 - **Levely jsou data-driven** a engine je pouze **interpretuje**.
 - Během fáze **playing** je **0 requestů na server** (a ideálně 0 requestů vůbec).
 - Input je bezpečný: stavově řízený attach/detach + respektuje `data-no-game-input`.
@@ -1424,7 +1424,7 @@ Tento dokument navrhuje **jeden univerzální action-based engine** pro hru **Ne
 - **timeline-based** (časované eventy),
 - podporuje **assets** (`/voices`, `/music`, `/sounds`),
 - splňuje pravidlo z `docs/AI_PROJECT_CONTEXT.md`: **během běhu levelu musí být 0 requestů na server**,
-- má bezpečný **input lifecycle** (stavově řízené listenery + `data-no-game-input`, jak je popsáno v `docs/ARCHITECTURE.md` a `docs/ENGINE_ANALYSIS.md`),
+- má bezpečný **input lifecycle** (stavově řízené listenery + `data-no-game-input`, jak je popsáno v `docs/ARCHITECTURE.md` a `docs/PROJECT_OVERVIEW.md`),
 - umí fallback na `"type": "custom"` (načtení JS levelu ze složky `levels/`).
 
 ---

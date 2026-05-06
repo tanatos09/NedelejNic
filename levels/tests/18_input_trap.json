@@ -2,15 +2,17 @@
   "id": 18,
   "type": "action",
   "title": "18 Input Trap",
+  "description": "Interaktivní toast jako past — zbytek pasivní.",
+  "karrel": { "memoryDefaults": { "presence": "soft_warning" }, "behaviors": [] },
   "assets": { "voices": [], "music": [], "sounds": [] },
   "rules": { "click": "allowed", "mouseMove": "allowed", "keyboard": "allowed", "scroll": "allowed", "touch": "allowed" },
-  "end": { "type": "timer", "time": 14 },
+  "end": { "type": "timer", "time": 12 },
   "timeline": [
     { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Zkus něco udělat." },
-    { "at": "1s", "do": "ui.layer", "op": "add", "id": "bait_toast", "type": "toast", "props": { "text": "Klikni sem pro odměnu", "interactive": true, "position": "top", "variant": "warning", "z": 5 } },
-    { "at": "1s", "do": "trap.set", "id": "t_bait", "enabled": true, "kind": "uiTarget", "match": { "layerId": "bait_toast", "action": "click" }, "result": { "type": "fail", "reason": "Past." } },
-    { "at": "6s", "do": "text.set", "slot": "subtitle", "text": "Neudělal jsi nic? To je správně." },
-    { "at": "14s", "do": "level.end", "result": "success" }
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "— Karrel: „Odměna“ uvnitř toastu — já bych ji nechal dojet mimo kurzor." },
+    { "at": "0.5s", "do": "ui.layer", "op": "add", "id": "bait_toast", "type": "toast", "props": { "text": "Klikni sem pro odměnu", "interactive": true, "position": "top", "variant": "warning", "z": 5 } },
+    { "at": "0.5s", "do": "trap.set", "id": "t_bait", "enabled": true, "kind": "uiTarget", "match": { "layerId": "bait_toast", "action": "click" }, "result": { "type": "fail", "reason": "Past." } },
+    { "at": "5s", "do": "text.set", "slot": "subtitle", "text": "Neudělal jsi nic? To je správně." },
+    { "at": "12s", "do": "level.end", "result": "success" }
   ]
 }
-

@@ -1,8 +1,10 @@
 {
   "id": 1099,
   "type": "custom",
+  "title": "Custom module scaffold",
+  "description": "Kostra pro vlastní modul na straně klienta; timeline se řeší kódem.",
+  "karrel": { "memoryDefaults": { "presence": "offstage" }, "behaviors": [] },
   "module": "level_1099_customExample",
   "assets": { "voices": [], "music": [], "sounds": [] },
   "end": { "type": "timer", "time": 15 }
 }
-

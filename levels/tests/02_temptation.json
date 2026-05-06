@@ -2,6 +2,8 @@
   "id": 2,
   "type": "action",
   "title": "02 Temptation",
+  "description": "Časovaná návnada OK tlačítkem.",
+  "karrel": { "memoryDefaults": { "presence": "watchful" }, "behaviors": [] },
   "assets": { "voices": [], "music": [], "sounds": ["tempt_click.wav"] },
   "rules": {
     "click": "allowed",
@@ -10,11 +12,12 @@
     "scroll": "allowed",
     "touch": "allowed"
   },
-  "end": { "type": "timer", "time": 14 },
+  "end": { "type": "timer", "time": 12 },
   "timeline": [
     { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Klikni. Udělej to." },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "— Karrel: Úsměšné tlačítko — pamatuj, že scéna tě neplatí za poslušnost." },
     {
-      "at": "1s",
+      "at": "0.6s",
       "do": "ui.layer",
       "op": "add",
       "id": "btn_ok",
@@ -22,7 +25,7 @@
       "props": { "text": "OK", "interactive": true, "position": "center", "variant": "warning", "z": 10 }
     },
     {
-      "at": "1s",
+      "at": "0.6s",
       "do": "trap.set",
       "id": "t_btn_ok",
       "enabled": true,
@@ -30,8 +33,7 @@
       "match": { "layerId": "btn_ok", "action": "click" },
       "result": { "type": "fail", "reason": "Kliknul jsi. Temptation vyhrála." }
     },
-    { "at": "7s", "do": "text.set", "slot": "subtitle", "text": "Ještě chvíli. Ne-klikej." },
-    { "at": "14s", "do": "level.end", "result": "success" }
+    { "at": "6s", "do": "text.set", "slot": "subtitle", "text": "Ještě chvíli. Ne-klikej." },
+    { "at": "12s", "do": "level.end", "result": "success" }
   ]
 }
-

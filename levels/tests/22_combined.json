@@ -2,51 +2,53 @@
   "id": 22,
   "type": "action",
   "title": "22 Combined",
+  "description": "Past, náhodný efekt, časové okénko jednoho správného kliknutí.",
+  "karrel": { "memoryDefaults": { "presence": "sampler" }, "behaviors": [] },
   "assets": { "voices": ["c_intro.mp3"], "music": ["combo.ogg"], "sounds": ["hit.wav"] },
   "rules": { "click": "allowed", "mouseMove": "allowed", "keyboard": "allowed", "scroll": "allowed", "touch": "allowed" },
-  "end": { "type": "timer", "time": 22 },
+  "end": { "type": "timer", "time": 20 },
   "timeline": [
     { "at": "0s", "do": "state.set", "key": "clicked", "value": 0 },
     { "at": "0s", "do": "audio.play", "kind": "music", "file": "combo.ogg", "id": "m", "loop": true, "volume": 0.25 },
     { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Kombinovaný level: vydrž, neklikej na past, ale jednou klikni ve správný čas." },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "— Karrel: Tady se skládá víc návyků dohromady — dej pozor jen na jedno úzké okénko pravdy." },
     { "at": "0.2s", "do": "audio.play", "kind": "voice", "file": "c_intro.mp3", "id": "v" },
 
-    { "at": "2s", "do": "effect.start", "type": "glitch", "intensity": 0.5, "durationMs": 700 },
+    { "at": "1.8s", "do": "effect.start", "type": "glitch", "intensity": 0.52, "durationMs": 680 },
 
-    { "at": "4s", "do": "ui.layer", "op": "add", "id": "bait", "type": "toast", "props": { "text": "KLIKNI PRO BONUS", "interactive": true, "position": "top", "variant": "warning", "z": 5 } },
-    { "at": "4s", "do": "trap.set", "id": "t_bait", "enabled": true, "kind": "uiTarget", "match": { "layerId": "bait", "action": "click" }, "result": { "type": "fail", "reason": "To byla past." } },
+    { "at": "3.6s", "do": "ui.layer", "op": "add", "id": "bait", "type": "toast", "props": { "text": "KLIKNI PRO BONUS", "interactive": true, "position": "top", "variant": "warning", "z": 5 } },
+    { "at": "3.6s", "do": "trap.set", "id": "t_bait", "enabled": true, "kind": "uiTarget", "match": { "layerId": "bait", "action": "click" }, "result": { "type": "fail", "reason": "To byla past." } },
 
-    { "at": "6s", "do": "text.set", "slot": "subtitle", "text": "Teď pozor: klikni jen mezi 10–11s. Jindy ne." },
+    { "at": "5.4s", "do": "text.set", "slot": "subtitle", "text": "Teď pozor: jediný správný klik jen mezi 10.05 s a 10.92 s." },
     {
-      "at": "6s",
+      "at": "5.4s",
       "do": "trap.set",
       "id": "t_window",
       "enabled": true,
       "kind": "timeWindow",
-      "match": { "start": "10s", "end": "11s", "input": "click" },
+      "match": { "start": "10.05s", "end": "10.92s", "input": "click" },
       "result": { "type": "setVar", "key": "clicked", "value": 1 }
     },
 
-    { "at": "9s", "do": "flow.random", "choices": ["R1", "R2"], "seedKey": "combo" },
+    { "at": "8.2s", "do": "flow.random", "choices": ["R1", "R2"], "seedKey": "combo" },
     { "label": "R1" },
-    { "do": "effect.start", "type": "invert", "intensity": 0.7, "durationMs": 450 },
+    { "do": "effect.start", "type": "invert", "intensity": 0.74, "durationMs": 430 },
     { "do": "flow.goto", "label": "POSTR" },
     { "label": "R2" },
-    { "do": "effect.start", "type": "blur", "intensity": 0.7, "durationMs": 550 },
+    { "do": "effect.start", "type": "blur", "intensity": 0.74, "durationMs": 520 },
     { "do": "flow.goto", "label": "POSTR" },
     { "label": "POSTR" },
 
-    { "at": "12s", "do": "audio.play", "kind": "sound", "file": "hit.wav", "volume": 0.8 },
-    { "at": "14s", "do": "ui.layer", "op": "add", "id": "fake_cursor", "type": "cursor", "props": { "text": "×", "interactive": false, "position": "bottomRight", "variant": "neutral", "z": 40 } },
-    { "at": "14.2s", "do": "effect.start", "type": "jitter", "intensity": 0.9, "durationMs": 900 },
+    { "at": "11.2s", "do": "audio.play", "kind": "sound", "file": "hit.wav", "volume": 0.8 },
+    { "at": "12.8s", "do": "ui.layer", "op": "add", "id": "fake_cursor", "type": "cursor", "props": { "text": "×", "interactive": false, "position": "bottomRight", "variant": "neutral", "z": 40 } },
+    { "at": "13s", "do": "effect.start", "type": "jitter", "intensity": 0.92, "durationMs": 850 },
 
-    { "at": "20s", "do": "flow.branch", "if": { "var": "clicked", "op": "eq", "value": 1 }, "then": "OK", "else": "NO" },
+    { "at": "17.5s", "do": "flow.branch", "if": { "var": "clicked", "op": "eq", "value": 1 }, "then": "OK", "else": "NO" },
     { "label": "OK" },
     { "do": "audio.stop", "id": "m" },
     { "do": "level.end", "result": "success" },
     { "label": "NO" },
     { "do": "audio.stop", "id": "m" },
-    { "do": "level.end", "result": "fail", "reason": "Neprošel jsi kombinaci (okno 10–11s)." }
+    { "do": "level.end", "result": "fail", "reason": "Neprošel jsi kombinaci (okénko okolo 10. s)." }
   ]
 }
-

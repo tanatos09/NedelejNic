@@ -2,13 +2,15 @@
   "id": 15,
   "type": "action",
   "title": "15 Minimalism",
+  "description": "Minimální text a ticho — vše vstupy zakázány.",
+  "karrel": { "memoryDefaults": { "presence": "whisper" }, "behaviors": [] },
   "assets": { "voices": [], "music": [], "sounds": [] },
   "rules": { "click": "forbidden", "mouseMove": "forbidden", "keyboard": "forbidden", "scroll": "forbidden", "touch": "forbidden" },
-  "end": { "type": "timer", "time": 9 },
+  "end": { "type": "timer", "time": 8 },
   "timeline": [
     { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "." },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "— Karrel: Jen tečka jako šum — zbytek nechám prázdný, ať máš kde dýchat." },
     { "at": "4s", "do": "text.set", "slot": "subtitle", "text": "" },
-    { "at": "9s", "do": "level.end", "result": "success" }
+    { "at": "8s", "do": "level.end", "result": "success" }
   ]
 }
-

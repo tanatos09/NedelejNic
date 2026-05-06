@@ -2,15 +2,18 @@
   "id": 7,
   "type": "action",
   "title": "07 Psychological Pressure",
+  "description": "Postupné zvyšování „systémového“ tlaku v UI.",
+  "karrel": { "memoryDefaults": { "presence": "grounding" }, "behaviors": [] },
   "assets": { "voices": [], "music": [], "sounds": ["sfx_error.wav"] },
   "rules": { "click": "allowed", "mouseMove": "allowed", "keyboard": "allowed", "scroll": "allowed", "touch": "allowed" },
-  "end": { "type": "timer", "time": 18 },
+  "end": { "type": "timer", "time": 16 },
   "timeline": [
     { "at": "0s", "do": "state.set", "key": "pressure", "value": 0 },
     { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Nezvládneš to." },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "— Karrel: Varování jsou dekorace. Když je necháš prostě projít kolem, ztratí část síly." },
 
-    { "at": "2s", "do": "state.add", "key": "pressure", "delta": 1 },
-    { "at": "2s", "do": "flow.branch", "if": { "var": "pressure", "op": "gte", "value": 1 }, "then": "P1", "else": "P0" },
+    { "at": "1.8s", "do": "state.add", "key": "pressure", "delta": 1 },
+    { "at": "1.8s", "do": "flow.branch", "if": { "var": "pressure", "op": "gte", "value": 1 }, "then": "P1", "else": "P0" },
     { "label": "P0" },
     { "do": "flow.goto", "label": "NEXT" },
     { "label": "P1" },
@@ -18,25 +21,24 @@
     { "do": "audio.play", "kind": "sound", "file": "sfx_error.wav", "volume": 0.8 },
     { "label": "NEXT" },
 
-    { "at": "6s", "do": "state.add", "key": "pressure", "delta": 1 },
-    { "at": "6s", "do": "flow.branch", "if": { "var": "pressure", "op": "gte", "value": 2 }, "then": "P2", "else": "P1B" },
+    { "at": "5.4s", "do": "state.add", "key": "pressure", "delta": 1 },
+    { "at": "5.4s", "do": "flow.branch", "if": { "var": "pressure", "op": "gte", "value": 2 }, "then": "P2", "else": "P1B" },
     { "label": "P1B" },
     { "do": "flow.goto", "label": "NEXT2" },
     { "label": "P2" },
-    { "do": "ui.layer", "op": "add", "id": "warn2", "type": "modal", "props": { "text": "SYSTÉM: ZBÝVÁ 12s", "position": "center", "variant": "danger", "interactive": false, "z": 8 } },
-    { "do": "effect.start", "type": "shake", "intensity": 0.6, "durationMs": 500 },
+    { "do": "ui.layer", "op": "add", "id": "warn2", "type": "modal", "props": { "text": "SYSTÉM: ZBÝVÁ MÁLO", "position": "center", "variant": "danger", "interactive": false, "z": 8 } },
+    { "do": "effect.start", "type": "shake", "intensity": 0.65, "durationMs": 520 },
     { "label": "NEXT2" },
 
-    { "at": "12s", "do": "state.add", "key": "pressure", "delta": 1 },
-    { "at": "12s", "do": "flow.branch", "if": { "var": "pressure", "op": "gte", "value": 3 }, "then": "P3", "else": "P2B" },
+    { "at": "10.5s", "do": "state.add", "key": "pressure", "delta": 1 },
+    { "at": "10.5s", "do": "flow.branch", "if": { "var": "pressure", "op": "gte", "value": 3 }, "then": "P3", "else": "P2B" },
     { "label": "P2B" },
     { "do": "flow.goto", "label": "END" },
     { "label": "P3" },
-    { "do": "effect.start", "type": "invert", "intensity": 0.9, "durationMs": 700 },
+    { "do": "effect.start", "type": "invert", "intensity": 0.9, "durationMs": 720 },
     { "do": "ui.layer", "op": "update", "id": "warn2", "type": "modal", "props": { "text": "SYSTÉM: PROHRAJEŠ.", "position": "center", "variant": "danger", "interactive": false, "z": 9 } },
     { "label": "END" },
 
-    { "at": "18s", "do": "level.end", "result": "success" }
+    { "at": "16s", "do": "level.end", "result": "success" }
   ]
 }
-

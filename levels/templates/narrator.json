@@ -2,14 +2,16 @@
   "id": 1005,
   "type": "action",
   "title": "Narrator arc",
+  "description": "Šablona: textová osa přes čas bez vstupu.",
+  "karrel": { "memoryDefaults": { "presence": "beside_you" }, "behaviors": [] },
   "assets": { "voices": [], "music": [], "sounds": [] },
   "rules": { "click": "forbidden", "mouseMove": "allowed", "keyboard": "forbidden", "scroll": "forbidden", "touch": "forbidden" },
   "end": { "type": "timer", "time": 14 },
   "timeline": [
     { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Dívej se. Jen dívej." },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "— Karrel: Já jen šeptám do scény — ty jen poslouchej, nemusíš na nic reagovat." },
     { "at": "4s", "do": "text.set", "slot": "subtitle", "text": "Tvoje ruka cuká, co?" },
     { "at": "8s", "do": "text.set", "slot": "subtitle", "text": "Ještě 6 sekund. Vydržíš?" },
     { "at": "14s", "do": "level.end", "result": "success" }
   ]
 }
-

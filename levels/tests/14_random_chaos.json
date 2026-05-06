@@ -2,12 +2,15 @@
   "id": 14,
   "type": "action",
   "title": "14 Random Chaos",
+  "description": "Deterministická větev flow.random.",
+  "karrel": { "memoryDefaults": { "presence": "curious" }, "behaviors": [] },
   "assets": { "voices": [], "music": [], "sounds": ["sfx_a.wav", "sfx_b.wav", "sfx_c.wav"] },
   "rules": { "click": "allowed", "mouseMove": "allowed", "keyboard": "allowed", "scroll": "allowed", "touch": "allowed" },
-  "end": { "type": "timer", "time": 14 },
+  "end": { "type": "timer", "time": 12 },
   "timeline": [
     { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Deterministický chaos." },
-    { "at": "1s", "do": "flow.random", "choices": ["A", "B", "C"], "seedKey": "suite14" },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "— Karrel: Náhoda tu má semínko — není to chaos z ulice, jen malá variace pro uši a oči." },
+    { "at": "0.6s", "do": "flow.random", "choices": ["A", "B", "C"], "seedKey": "suite14" },
 
     { "label": "A" },
     { "do": "audio.play", "kind": "sound", "file": "sfx_a.wav", "volume": 0.9 },
@@ -25,7 +28,6 @@
     { "do": "flow.goto", "label": "END" },
 
     { "label": "END" },
-    { "at": "14s", "do": "level.end", "result": "success" }
+    { "at": "12s", "do": "level.end", "result": "success" }
   ]
 }
-

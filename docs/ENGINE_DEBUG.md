@@ -133,7 +133,7 @@ Log je jen observability:
 ## 4) Known limitations
 
 - Asset existence je “best effort”:
-  - repo aktuálně nemá reálné asset soubory, takže `assetManifest.ts` je prázdný a validator loguje warning.
+  - pokud `assetManifest.ts` zůstane prázdný, validator hlásí warning k souborům v `assets.*`.
 - “Active action monitor” sleduje stav přes snapshoty (ne per-action hook list).
-- Step mode/next event/skip-to-end z původního engine není pro newEngine zatím implementováno (UI tlačítka jsou no-op).
+- **DEV step**: `debugNextStep` / `debugSkipToEnd` na `LevelRunner` jsou zapojené z GamePage (ne no-op); ovlivňují scheduler mimo běžné časování — jen pro ladění.
 

@@ -2,11 +2,14 @@
   "id": 1004,
   "type": "action",
   "title": "Puzzle (secret pattern)",
+  "description": "Šablona: úspěch přes sekvenci kláves v časovém okně.",
+  "karrel": { "memoryDefaults": { "presence": "patient" }, "behaviors": [] },
   "assets": { "voices": [], "music": [], "sounds": [] },
   "rules": { "click": "allowed", "mouseMove": "allowed", "keyboard": "allowed", "scroll": "allowed", "touch": "allowed" },
   "end": { "type": "timer", "time": 20 },
   "timeline": [
     { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Tajná kombinace: X, X, X do 2 sekund." },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "— Karrel: Jakmile přesně víš vzorec, už to není hádanka — jen jemný rituál kláves. Nech to proběhnout v klidu." },
     {
       "at": "0s",
       "do": "trap.set",
@@ -19,4 +22,3 @@
     { "at": "20s", "do": "level.end", "result": "fail", "reason": "Nestihl jsi pattern." }
   ]
 }
-

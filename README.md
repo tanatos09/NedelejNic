@@ -1,6 +1,8 @@
-# NedelejNic
+# NedělejNic
 
 Psychologická webová hra. Pravidlo je jedno — **nedělej nic**.
+
+Dokumentace v repozitáři: **[docs/README.md](docs/README.md)** — rejstřík + **[docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md)** (aktuální stav engine a levelů).
 
 ## Požadavky
 
@@ -15,13 +17,8 @@ Psychologická webová hra. Pravidlo je jedno — **nedělej nic**.
 ### 1. Naklonuj repozitář a nainstaluj závislosti
 
 ```bash
-# Backend
-cd server
-npm install
-
-# Frontend
-cd ../client
-npm install
+cd server && npm install
+cd ../client && npm install
 ```
 
 ### 2. Nastav prostředí
@@ -31,9 +28,7 @@ cd server
 cp ../.env.example .env
 ```
 
-Uprav `.env`:
-- `DATABASE_URL` — připojení k tvé PostgreSQL databázi
-- `SESSION_SECRET` — náhodný řetězec min. 32 znaků (např. vygeneruj přes `openssl rand -hex 32`)
+Uprav `.env`: `DATABASE_URL`, `SESSION_SECRET` (min. 32 znaků), případně `LEVEL_SECRET` pro podpis levelů v produkci.
 
 ### 3. Inicializuj databázi
 
@@ -44,19 +39,15 @@ npx prisma migrate dev --name init
 
 ### 4. Spusť backend a frontend
 
-V jednom terminálu:
 ```bash
-cd server
-npm run dev
+cd server && npm run dev
 ```
 
-Ve druhém terminálu:
 ```bash
-cd client
-npm run dev
+cd client && npm run dev
 ```
 
-Aplikace běží na: **http://localhost:5173**
+Aplikace: **http://localhost:5173** (Vite proxy na API dle `client/vite.config.ts`).
 
 ---
 
@@ -64,90 +55,62 @@ Aplikace běží na: **http://localhost:5173**
 
 ```
 nedelejnic/
-├── client/               # React + Vite + TypeScript
+├── client/                 # React + Vite + TypeScript
+│   ├── public/assets/     # statické audio (voices/music/sounds) → /assets/...
 │   └── src/
-│       ├── components/   # UI komponenty, admin komponenty
-│       ├── engine/       # LevelEngine, InputSystem
-│       ├── hooks/        # useAuthGuard, useAdminQueries
-│       ├── pages/        # AuthPage, GamePage, AdminDashboard, UsersPage
-│       ├── services/     # API volání (api, adminApi, httpClient)
-│       ├── store/        # Zustand (adminStore)
-│       └── types/        # TypeScript definice
-├── server/               # Node.js + Express + TypeScript
-│   ├── prisma/           # Prisma schema + migrace
+│       ├── engine/
+│       │   ├── core/       # EngineHost (LevelRunner + InputManager)
+│       │   ├── newEngine/  # LevelRunner, TimelineScheduler, ActionDispatcher, …
+│       │   └── input/      # InputManager
+│       ├── pages/          # GamePage, AuthPage, AdminDashboard, …
+│       ├── services/       # api, adminApi, httpClient
+│       └── ...
+├── server/                 # Express + Prisma
 │   └── src/
-│       ├── controllers/  # auth, game, admin
-│       ├── middleware/    # Auth, role check, rate limit
-│       ├── routes/       # Express routery
-│       ├── levels.ts     # Konfigurace levelů
-│       └── app.ts        # Express aplikace
-└── docs/                 # Dokumentace projektu
+│       ├── levels.ts       # načítání JSON z ../../levels
+│       └── controllers/
+├── levels/                 # Zdroj levelů (JSON na disku)
+│   ├── tests/              # priorita při kolizi id — vývojové testovací levely
+│   └── templates/
+└── docs/                   # viz docs/README.md
 ```
 
 ---
 
 ## Role
 
-| Role   | Popis                                                                 |
-|--------|-----------------------------------------------------------------------|
-| PLAYER | Normální hráč — automatická progrese, auto-logout po levelu          |
-| DEV    | Debug režim — pause/resume, step mode, jump level, event log         |
-| ADMIN  | Plný přístup — admin dashboard + vše co DEV                         |
+| Role   | Popis |
+|--------|--------|
+| PLAYER | Běžná hra, postup podle `user.level`, po levelu odpočet k odhlášení |
+| DEV    | Ladění: pauza, inspektor, skok mezi levely API, výsledek neposouvá level v DB |
+| ADMIN  | Admin dashboard + chování jako DEV ve hře |
 
-Nový uživatel má vždy roli `PLAYER`. Role se mění přes admin dashboard (pouze ADMIN).
-
----
-
-## API endpointy
-
-### Autentizace
-
-| Metoda | Cesta             | Popis                              |
-|--------|-------------------|------------------------------------|
-| POST   | /auth/register    | Registrace nového hráče            |
-| POST   | /auth/login       | Přihlášení                         |
-| POST   | /auth/logout      | Odhlášení                          |
-| GET    | /auth/me          | Aktuální přihlášený hráč           |
-
-### Hra
-
-| Metoda | Cesta             | Popis                              |
-|--------|-------------------|------------------------------------|
-| GET    | /level/:id        | Konfigurace levelu                 |
-| POST   | /result           | Odeslání výsledku (success / fail) |
-
-### Admin (vyžaduje ADMIN nebo DEV roli)
-
-| Metoda | Cesta                              | Popis                          |
-|--------|------------------------------------|---------------------------------|
-| GET    | /admin/users                       | Seznam uživatelů (paginated)   |
-| GET    | /admin/users/:userId               | Detail uživatele + audit log   |
-| PUT    | /admin/users/:userId/role          | Změna role (pouze ADMIN)       |
-| PUT    | /admin/users/:userId/ban           | Ban/unban (pouze ADMIN)        |
-| PUT    | /admin/users/:userId/level         | Nastavení levelu               |
-| POST   | /admin/users/:userId/reset-progress| Reset progresu na level 1      |
-| POST   | /admin/users/:userId/invalidate-session | Nucené odhlášení          |
-| GET    | /admin/audit                       | Audit log (paginated)          |
+Změna rolí přes admin rozhraní.
 
 ---
 
-## Level systém
+## API (zjednodušeně)
 
-Prvních 10 levelů je ručně napsaných s originálními texty. Každý další level se generuje procedurálně — delší trvání, více akcí k detekci.
+| Oblast | Cesty |
+|--------|--------|
+| Auth   | `/auth/register`, `/auth/login`, `/auth/me` |
+| Hra    | `GET /level/:id`, `POST /result` |
+| Admin  | `/admin/*` — viz `docs/ADMIN_API_CONTRACT.md` |
 
-Detekované akce podle levelu:
-- Level 1–3: kliknutí, klávesnice
-- Level 4–6: + scroll
-- Level 7+: + pohyb myší
-- Level 9+: + dotyk (mobile)
+---
+
+## Levely
+
+- Definují se jako **JSON** v adresáři **`levels/`** (viz **`docs/LEVEL_FORMAT.md`**).
+- Server **nepřiděluje** úrovně procedurálním generátorem v kódu — obsah je soubory v repozitáři (nebo budoucí build pipeline).
+- Klient po načtení levelu **neposílá požadavky na server během hraní**; po skončení jedno `POST /result` s podpisem.
+
+Starší dokumentace o „procedurálních“ vyšších úrovních neplatí — aktuální pravda je v **`docs/PROJECT_OVERVIEW.md`**.
 
 ---
 
 ## Produkce
 
-Před nasazením:
-1. Nastav `NODE_ENV=production` v `.env`
-2. Nastav `SESSION_SECRET` na silný náhodný řetězec
-3. Nastav `CLIENT_URL` na doménu frontendu
-4. Zvažte nahrazení MemoryStore persistentním session store (connect-pg-simple)
-5. Spusť `npm run build` v `server/` a serv přes `npm start`
+1. `NODE_ENV=production`, silné `SESSION_SECRET` / `LEVEL_SECRET`
+2. `CLIENT_URL` = veřejná URL frontendu (CORS)
+3. `npm run build` v `client/` a `server/`, server přes `npm start`

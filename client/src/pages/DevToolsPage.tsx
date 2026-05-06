@@ -1,35 +1,79 @@
 ﻿import React, { useState } from 'react';
+import { api } from '../services/api';
+import { adminApi } from '../services/adminApi';
 
 export const DevToolsPage: React.FC = () => {
   const [commandInput, setCommandInput] = useState('');
   const [commandOutput, setCommandOutput] = useState<string[]>([
     '> DevTools Console initialized',
-    '> Type "help" for available commands',
+    '> Type "help" for commands. Try: me, users, level 1, audit',
   ]);
 
-  const executeCommand = (cmd: string) => {
+  const push = (...lines: string[]) => setCommandOutput((prev) => [...prev, ...lines]);
+
+  const executeCommand = async (cmd: string) => {
     const trimmed = cmd.trim();
     if (!trimmed) return;
-    setCommandOutput((prev) => [...prev, `$ ${trimmed}`]);
+    push(`$ ${trimmed}`);
 
     if (trimmed === 'help') {
-      setCommandOutput((prev) => [
-        ...prev,
-        '  reset-all       â€” Reset all users to level 1',
-        '  export-stats    â€” Export game statistics',
-        '  server-status   â€” Check server status',
-        '  clear           â€” Clear console',
-      ]);
+      push(
+        '  clear                 — Clear console',
+        '  me                    — GET /auth/me',
+        '  users                 — GET /admin/users (first page)',
+        '  audit                 — GET /admin/audit (first page)',
+        '  level <id>            — GET /level/:id (e.g. level 5)'
+      );
     } else if (trimmed === 'clear') {
       setCommandOutput(['> Console cleared']);
-    } else if (trimmed === 'server-status') {
-      setCommandOutput((prev) => [
-        ...prev,
-        '  status: online',
-        '  db: connected',
-      ]);
+    } else if (trimmed === 'me') {
+      try {
+        const me = await api.me();
+        push(`  ok: ${me.username} [${me.role}] level=${me.level}`);
+      } catch (e) {
+        push(`  error: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    } else if (trimmed === 'users') {
+      try {
+        const res = await adminApi.getUsers(0, 10, {});
+        push(`  ok: total=${res.total} page=${res.page} pageSize=${res.pageSize}`);
+        for (const u of res.users.slice(0, 10)) {
+          push(`  - ${u.username} [${u.role}] L${u.level} banned=${u.isBanned}`);
+        }
+      } catch (e) {
+        push(`  error: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    } else if (trimmed === 'audit') {
+      try {
+        const r = await fetch('/admin/audit?page=0&pageSize=10', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('nedelejnic_token') ?? ''}`,
+          },
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data?.error ?? `HTTP ${r.status}`);
+        push(`  ok: total=${data.total} entries=${data.logs?.length ?? 0}`);
+        for (const l of (data.logs ?? []).slice(0, 10)) {
+          push(`  - ${l.createdAt} ${l.actorUsername} -> ${l.targetUsername}: ${l.action}`);
+        }
+      } catch (e) {
+        push(`  error: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    } else if (trimmed.startsWith('level ')) {
+      const n = Number(trimmed.split(/\s+/)[1]);
+      if (!Number.isFinite(n) || n < 1) {
+        push('  error: usage: level <id>');
+      } else {
+        try {
+          const lvl = await api.getLevel(n);
+          push(`  ok: id=${lvl.id} type=${(lvl as any).type ?? 'unknown'}`);
+          push(`  timeline=${Array.isArray((lvl as any).timeline) ? (lvl as any).timeline.length : '—'}`);
+        } catch (e) {
+          push(`  error: ${e instanceof Error ? e.message : String(e)}`);
+        }
+      }
     } else {
-      setCommandOutput((prev) => [...prev, `  unknown command: ${trimmed}`]);
+      push(`  unknown command: ${trimmed}`);
     }
     setCommandInput('');
   };
@@ -38,20 +82,21 @@ export const DevToolsPage: React.FC = () => {
     <div className="space-y-6">
       <div className="border-b border-[#1a1a1a] pb-5">
         <h1 className="text-2xl font-bold text-white tracking-wide">Dev Tools</h1>
-        <p className="text-[#444] text-sm mt-1">NĂˇstroje pro debug a sprĂˇvu</p>
+        <p className="text-[#444] text-sm mt-1">Nástroje pro debug a správu</p>
       </div>
 
       {/* Quick actions */}
       <div className="grid grid-cols-2 gap-4">
         {[
-          { title: 'DatabĂˇze', items: ['Backup', 'Export uĹľivatelĹŻ'] },
-          { title: 'Server', items: ['Zobrazit logy', 'System stats'] },
+          { title: 'Rychlé akce', items: ['me', 'users', 'audit', 'level 1'] },
+          { title: 'Nápověda', items: ['help', 'clear'] },
         ].map((section) => (
           <div key={section.title} className="bg-[#0d0d0d] border border-[#1a1a1a] rounded p-5 space-y-2">
             <p className="text-[10px] font-bold tracking-[2px] text-[#444] uppercase mb-3">{section.title}</p>
             {section.items.map((item) => (
               <button
                 key={item}
+                onClick={() => executeCommand(item)}
                 className="w-full text-left px-3 py-2.5 text-sm text-[#666] hover:text-white hover:bg-[#111] rounded transition-colors border border-[#1a1a1a]"
               >
                 {item}

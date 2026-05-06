@@ -2,12 +2,14 @@
   "id": 1001,
   "type": "action",
   "title": "Wait",
+  "description": "Šablona: čekání bez vstupů.",
+  "karrel": { "memoryDefaults": { "presence": "quiet" }, "behaviors": [] },
   "assets": { "voices": [], "music": [], "sounds": [] },
   "rules": { "click": "forbidden", "mouseMove": "forbidden", "keyboard": "forbidden", "scroll": "forbidden", "touch": "forbidden" },
   "end": { "type": "timer", "time": 10 },
   "timeline": [
     { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Nedělej nic. 10 sekund." },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "— Karrel: Jen tak sedět a nic nedělat... někdy je to nejtěžší scénář, ale dává nejvíc klidu." },
     { "at": "10s", "do": "level.end", "result": "success" }
   ]
 }
-

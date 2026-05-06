@@ -2,12 +2,14 @@ import type { Action, EventLogEntry, RenderLayer } from './types';
 import type { StateStore } from './StateStore';
 import type { AudioSystem } from './AudioSystem';
 import type { EffectSystem } from './EffectSystem';
+import type { HookRuntime } from '../effects/HookRuntime';
 
 export class ActionDispatcher {
   constructor(
     private state: StateStore,
     private audio: AudioSystem,
     private effects: EffectSystem,
+    private hooks: HookRuntime | null = null,
     private log?: (e: EventLogEntry) => void,
     private nowMs: () => number = () => 0
   ) {}
@@ -56,6 +58,10 @@ export class ActionDispatcher {
         this.effects.stop(action);
         return {};
       }
+      case 'hook.run': {
+        this.hooks?.run(action.name, action.params);
+        return {};
+      }
       case 'rules.set': {
         this.state.setRule(action.rules);
         this.log?.({ t: this.nowMs(), kind: 'rule', msg: 'rules.set', data: action.rules });
@@ -95,6 +101,23 @@ export class ActionDispatcher {
       }
       case 'flow.random': {
         // TimelineScheduler handles choice deterministically; dispatcher logs only.
+        return {};
+      }
+      case 'fail': {
+        if (action.severity === 'endLevel') {
+          return { end: { result: 'fail', reason: action.reason } };
+        }
+        if (action.severity === 'penalty') {
+          const key = action.key ?? '__penalty';
+          const base = this.state.getVarNumber(key);
+          this.state.setVar(key, base + 1);
+          return {};
+        }
+        if (action.severity === 'flag') {
+          const key = action.key ?? '__flag';
+          this.state.setVar(key, 1);
+          return {};
+        }
         return {};
       }
       case 'level.end': {

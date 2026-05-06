@@ -17,6 +17,18 @@ Pokud je nějaký požadavek v konfliktu s tímto dokumentem, má přednost tent
 
 ---
 
+# STAV IMPLEMENTACE (kód v repozitáři)
+
+Tato sekce doplňuje vizi o **skutečnost**; detailní mapa: [`PROJECT_OVERVIEW.md`](./PROJECT_OVERVIEW.md).
+
+- **Levely** se ukládají jako **JSON v `levels/`**; server je načítá a **podepisuje**, negeneruje je procedurálně v JS (žádný `generateLevel(levelNum)` ve stylu starého návrhu).
+- **Runtime enginu** na klientovi je **`LevelRunner` + `TimelineScheduler`** (`client/src/engine/newEngine/`), ne starý `LevelEngine` jako hlavní smyčka.
+- **0 requestů během hraní levelu** — stále platí: po načtení konfigurace a preloadu assetů se během `playing` nevolá API.
+- **Admin dashboard**, role, audit — implementováno (viz `docs/ADMIN_API_CONTRACT.md`).
+- Produktová **vize** níže (100+ levelů, placený balíček, streamer módy) je **cíl**, ne vždy hotový kód.
+
+---
+
 # 1. ZÁKLADNÍ MYŠLENKA HRY
 
 NedelejNic je webová hra pro desktopové prohlížeče.
@@ -170,8 +182,8 @@ Architektura je navržena pro:
 
 Princip:
 
-backend generuje level
-frontend level pouze spouští
+backend dodává hotový level (JSON) a podpis
+frontend level pouze spouští (interpretuje data)
 
 ---
 
@@ -179,19 +191,15 @@ frontend level pouze spouští
 
 Backend obsahuje:
 
-* logiku hry
-* generování levelů
-* statistiky
-* ukládání progresu
-* validaci výsledků
-
-Backend vrací kompletní data levelu.
+* doručení konfigurace levelu (čtení z `levels/**/*.json`)
+* podpis a validaci výsledků
+* účty, role, admin, audit (dle implementace)
 
 API například:
 
 GET /level/{id}
 
-Backend vrací celý level jako JSON.
+Backend vrací celý level jako JSON (včetně pole `signature`).
 
 ---
 

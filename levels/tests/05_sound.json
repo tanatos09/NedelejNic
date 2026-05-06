@@ -2,6 +2,8 @@
   "id": 5,
   "type": "action",
   "title": "05 Sound",
+  "description": "Audio kanály: hudba, SFX, hlas.",
+  "karrel": { "memoryDefaults": { "presence": "listening" }, "behaviors": [] },
   "assets": { "voices": ["voice_hello.mp3"], "music": ["music_loop.ogg"], "sounds": ["sfx_ping.wav", "sfx_boop.wav"] },
   "rules": {
     "click": "allowed",
@@ -10,16 +12,16 @@
     "scroll": "allowed",
     "touch": "allowed"
   },
-  "end": { "type": "timer", "time": 14 },
+  "end": { "type": "timer", "time": 12 },
   "timeline": [
     { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Poslouchej." },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "— Karrel: Hudba odejde dřív než slova — poslouchej, jak zůstane ticho." },
     { "at": "0.2s", "do": "audio.play", "kind": "music", "file": "music_loop.ogg", "id": "m1", "loop": true, "volume": 0.4 },
     { "at": "1.2s", "do": "audio.play", "kind": "sound", "file": "sfx_ping.wav", "volume": 0.9 },
     { "at": "2.4s", "do": "audio.play", "kind": "sound", "file": "sfx_boop.wav", "volume": 0.9 },
-    { "at": "3.2s", "do": "audio.play", "kind": "voice", "file": "voice_hello.mp3", "id": "v1", "volume": 1 },
-    { "at": "6s", "do": "audio.stop", "id": "m1" },
-    { "at": "7s", "do": "text.set", "slot": "subtitle", "text": "Ticho." },
-    { "at": "14s", "do": "level.end", "result": "success" }
+    { "at": "3s", "do": "audio.play", "kind": "voice", "file": "voice_hello.mp3", "id": "v1", "volume": 1 },
+    { "at": "5.5s", "do": "audio.stop", "id": "m1" },
+    { "at": "6s", "do": "text.set", "slot": "subtitle", "text": "Ticho." },
+    { "at": "12s", "do": "level.end", "result": "success" }
   ]
 }
-

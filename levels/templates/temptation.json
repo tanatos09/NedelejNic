@@ -2,11 +2,14 @@
   "id": 1002,
   "type": "action",
   "title": "Temptation",
+  "description": "Šablona: návnada jako tlačítko, kliknutí končí chybou.",
+  "karrel": { "memoryDefaults": { "presence": "watchful" }, "behaviors": [] },
   "assets": { "voices": [], "music": [], "sounds": [] },
   "rules": { "click": "allowed", "mouseMove": "allowed", "keyboard": "allowed", "scroll": "allowed", "touch": "allowed" },
   "end": { "type": "timer", "time": 12 },
   "timeline": [
     { "at": "0s", "do": "text.set", "slot": "subtitle", "text": "Klikni na to tlačítko. Udělej to." },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "— Karrel: Když něco řve „udělej to“, já se spíš zeptám, jestli to potřebuješ ty, nebo konstrukce scény." },
     {
       "at": "2s",
       "do": "ui.layer",
@@ -27,4 +30,3 @@
     { "at": "12s", "do": "level.end", "result": "success" }
   ]
 }
-
