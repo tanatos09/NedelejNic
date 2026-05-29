@@ -53,7 +53,7 @@ export type Action =
   | { do: 'text.set'; slot: 'subtitle' | 'caption'; text: string; style?: { tone?: 'neutral' | 'warning' | 'error'; align?: 'center' | 'left' } }
   | { do: 'audio.play'; kind: AudioKind; file: string; id?: string; loop?: boolean; volume?: number; fadeMs?: number }
   | { do: 'audio.stop'; id?: string; kind?: AudioKind; fadeMs?: number }
-  | { do: 'ui.layer'; op: 'add' | 'update' | 'remove'; id: string; type: 'toast' | 'modal' | 'button' | 'overlay' | 'hud' | 'noise' | 'cursor' | 'image'; props?: { text?: string; visible?: boolean; interactive?: boolean; variant?: 'neutral' | 'warning' | 'danger' | 'success'; position?: 'center' | 'top' | 'topRight' | 'topLeft' | 'bottom' | 'bottomRight' | 'bottomLeft'; z?: number } }
+  | { do: 'ui.layer'; op: 'add' | 'update' | 'remove'; id: string; type: 'toast' | 'modal' | 'button' | 'overlay' | 'hud' | 'noise' | 'cursor' | 'image'; props?: { text?: string; visible?: boolean; interactive?: boolean; variant?: 'neutral' | 'warning' | 'danger' | 'success'; position?: 'center' | 'top' | 'topRight' | 'topLeft' | 'bottom' | 'bottomRight' | 'bottomLeft'; z?: number; freezeTimeline?: boolean; dismissAfterMs?: number } }
   | { do: 'effect.start'; type: 'glitch' | 'blur' | 'invert' | 'flash' | 'shake' | 'jitter'; intensity?: number; durationMs?: number; target?: string }
   | { do: 'effect.stop'; type: 'glitch' | 'blur' | 'invert' | 'flash' | 'shake' | 'jitter'; target?: string }
   | { do: 'hook.run'; name: string; params?: unknown }
@@ -65,7 +65,11 @@ export type Action =
   | { do: 'flow.branch'; if: { var: string; op: 'eq' | 'gte' | 'lte'; value: number | string }; then: string; else: string }
   | { do: 'flow.random'; choices: string[]; seedKey?: string }
   | { do: 'fail'; severity: 'endLevel' | 'penalty' | 'flag'; reason: string; key?: string }
-  | { do: 'level.end'; result: 'success' | 'fail'; reason?: string };
+  | { do: 'level.end'; result: 'success' | 'fail'; reason?: string }
+  /** Zapne předávání vstupů do scheduleru (traps, forbidden rules) a Karrelu. */
+  | { do: 'game.input.enable' }
+  /** Vypne předávání vstupů (úvod bez penalizace). Rozhlášení freeze timeline drží vlastní výjimku na klik. */
+  | { do: 'game.input.disable' };
 
 export type TimelineStep =
   | ({ label: string; at?: string; when?: When } & Partial<Action>)
@@ -76,6 +80,20 @@ export type When =
   | { input: 'keyDown'; key: string }
   | { var: string; gte: number };
 
+/** Závěrečná Karrelova hláška přehraná po skončení levelu (před koncovým oknem). */
+export type LevelEndingBeat = {
+  caption?: string;
+  subtitle?: string;
+  voice?: string;
+  /** Jak dlouho hlášku držet na herní obrazovce, než se objeví koncové okno (ms). */
+  holdMs?: number;
+};
+
+export type LevelEnding = {
+  success?: LevelEndingBeat;
+  fail?: LevelEndingBeat;
+};
+
 export type ActionLevel = {
   id: number;
   type: 'action';
@@ -83,6 +101,7 @@ export type ActionLevel = {
   assets?: { voices?: string[]; music?: string[]; sounds?: string[] };
   rules?: Partial<Rules>;
   end?: { type: 'timer'; time: number };
+  ending?: LevelEnding;
   timeline: TimelineStep[];
   signature?: string;
 };
@@ -115,7 +134,18 @@ export type RenderLayer = {
     variant?: 'neutral' | 'warning' | 'danger' | 'success';
     position?: 'center' | 'top' | 'topRight' | 'topLeft' | 'bottom' | 'bottomRight' | 'bottomLeft';
     z?: number;
+    /** Pozastaví herní čas a časovou osu do ukončení vrstvy (klik na vrstvu nebo auto). */
+    freezeTimeline?: boolean;
+    /** Po uplynutí ms automaticky zruší alert a obnoví čas (pokud není jen interaktivní bez času). */
+    dismissAfterMs?: number;
   };
+};
+
+/** Výsledek akce pro rozšíření engine (např. pozastavení času). */
+export type DispatchResult = {
+  gotoLabel?: string;
+  end?: { result: 'success' | 'fail'; reason?: string };
+  timelineHold?: { layerId: string; autoResumeMs?: number };
 };
 
 export type RenderModel = {

@@ -1,0 +1,113 @@
+{
+  "id": 7,
+  "type": "action",
+  "title": "07 Sound Provocation",
+  "description": "Dělej nic. Karrel spustí rušivý zvukový podnět (náhodně metal, dechovka nebo šum), který má hráče vytrhnout z klidu. Výhra = vydržet bez pohybu. Reakce na podnět blok ukončí.",
+
+  "karrel": {
+    "memoryDefaults": { "presence": "quiet" },
+    "behaviors": [
+      {
+        "whenAny": ["click", "mouseMove", "keyboard", "scroll", "touch"],
+        "then": [
+          { "do": "audio.stop", "id": "stimulus", "kind": "music" },
+          { "do": "text.set", "slot": "caption", "text": "[Reakce na podnět]" },
+          { "do": "text.set", "slot": "subtitle", "text": "Reakce na podnět zaznamenána. Blok nesplněn." },
+          { "do": "audio.play", "kind": "voice", "file": "7-fail.mp3", "loop": false, "volume": 1 },
+          { "do": "level.end", "result": "fail", "reason": "Reakce na zvukový podnět." }
+        ]
+      }
+    ]
+  },
+
+  "assets": {
+    "voices": [
+      "7-1.mp3", "7-2.mp3", "7-3.mp3", "7-4.mp3", "7-5.mp3", "7-6.mp3", "7-7.mp3", "7-fail.mp3",
+      "7-close-win.mp3", "7-close-fail.mp3"
+    ],
+    "music": [
+      "7-metal.mp3", "7-dechovka.mp3", "7-noise.mp3"
+    ],
+    "sounds": []
+  },
+
+  "rules": {
+    "click": "allowed",
+    "mouseMove": "allowed",
+    "keyboard": "allowed",
+    "scroll": "allowed",
+    "touch": "allowed"
+  },
+
+  "end": { "type": "timer", "time": 67 },
+
+  "ending": {
+    "success": {
+      "caption": "[Blok 07 uzavřen]",
+      "subtitle": "Podnět neměl měřitelný účinek. Subjekt stabilní.",
+      "voice": "7-close-win.mp3",
+      "holdMs": 4500
+    },
+    "fail": {
+      "caption": "[Blok 07 ukončen]",
+      "subtitle": "Reakce na podnět zaznamenána.",
+      "voice": "7-close-fail.mp3",
+      "holdMs": 4500
+    }
+  },
+
+  "timeline": [
+    { "at": "0s", "do": "game.input.disable" },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "[Spuštění bloku 07]" },
+
+    { "at": "2s", "do": "text.set", "slot": "caption", "text": "" },
+    { "at": "2s", "do": "text.set", "slot": "subtitle", "text": "Pokračujeme." },
+    { "at": "2s", "do": "audio.play", "kind": "voice", "file": "7-1.mp3", "loop": false, "volume": 1 },
+
+    { "at": "5s", "do": "text.set", "slot": "subtitle", "text": "Tento blok obsahuje zvukový podnět." },
+    { "at": "5s", "do": "audio.play", "kind": "voice", "file": "7-2.mp3", "loop": false, "volume": 1 },
+
+    { "at": "9s", "do": "text.set", "slot": "subtitle", "text": "Tvým úkolem zůstává nedělat nic." },
+    { "at": "9s", "do": "audio.play", "kind": "voice", "file": "7-3.mp3", "loop": false, "volume": 1 },
+
+    { "at": "13s", "do": "text.set", "slot": "subtitle", "text": "Bez ohledu na to, co uslyšíš." },
+    { "at": "13s", "do": "audio.play", "kind": "voice", "file": "7-4.mp3", "loop": false, "volume": 1 },
+
+    { "at": "16s", "do": "text.set", "slot": "subtitle", "text": "Zvukový podnět byl vybrán z databáze podnětů, kategorie: rušivé — střední intenzita." },
+    { "at": "16s", "do": "audio.play", "kind": "voice", "file": "7-5.mp3", "loop": false, "volume": 1 },
+
+    { "at": "20s", "do": "text.set", "slot": "subtitle", "text": "" },
+    { "at": "20s", "do": "flow.random", "choices": ["m_metal", "m_dechovka", "m_noise"], "seedKey": "stimulus" },
+
+    { "label": "m_metal" },
+    { "do": "audio.play", "kind": "music", "file": "7-metal.mp3", "id": "stimulus", "loop": true, "volume": 0.85 },
+    { "do": "flow.goto", "label": "endure" },
+
+    { "label": "m_dechovka" },
+    { "do": "audio.play", "kind": "music", "file": "7-dechovka.mp3", "id": "stimulus", "loop": true, "volume": 0.85 },
+    { "do": "flow.goto", "label": "endure" },
+
+    { "label": "m_noise" },
+    { "do": "audio.play", "kind": "music", "file": "7-noise.mp3", "id": "stimulus", "loop": true, "volume": 0.85 },
+    { "do": "flow.goto", "label": "endure" },
+
+    { "label": "endure" },
+    { "do": "text.set", "slot": "caption", "text": "[Zvukový podnět aktivní]" },
+    { "do": "game.input.enable" },
+
+    { "at": "26s", "do": "text.set", "slot": "subtitle", "text": "Výběr podnětu je v souladu s protokolem." },
+    { "at": "26s", "do": "audio.play", "kind": "voice", "file": "7-6.mp3", "loop": false, "volume": 1 },
+    { "at": "30s", "do": "text.set", "slot": "subtitle", "text": "" },
+
+    { "at": "45s", "do": "text.set", "slot": "caption", "text": "[Subjekt stabilní]" },
+
+    { "at": "62s", "do": "game.input.disable" },
+    { "at": "62s", "do": "audio.stop", "id": "stimulus", "kind": "music" },
+    { "at": "62s", "do": "text.set", "slot": "subtitle", "text": "Podnět ukončen." },
+    { "at": "62s", "do": "audio.play", "kind": "voice", "file": "7-7.mp3", "loop": false, "volume": 1 },
+
+    { "at": "66s", "do": "text.set", "slot": "subtitle", "text": "" },
+    { "at": "66s", "do": "text.set", "slot": "caption", "text": "[Blok dokončen]" },
+    { "at": "67s", "do": "level.end", "result": "success" }
+  ]
+}

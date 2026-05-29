@@ -1,4 +1,4 @@
-import type { Action, EventLogEntry, RenderLayer } from './types';
+import type { Action, DispatchResult, EventLogEntry, RenderLayer } from './types';
 import type { StateStore } from './StateStore';
 import type { AudioSystem } from './AudioSystem';
 import type { EffectSystem } from './EffectSystem';
@@ -14,7 +14,7 @@ export class ActionDispatcher {
     private nowMs: () => number = () => 0
   ) {}
 
-  dispatch(action: Action): { gotoLabel?: string; end?: { result: 'success' | 'fail'; reason?: string } } {
+  dispatch(action: Action): DispatchResult {
     this.log?.({ t: this.nowMs(), kind: 'action', msg: action.do, data: action });
 
     switch (action.do) {
@@ -35,19 +35,30 @@ export class ActionDispatcher {
           this.state.removeLayer(action.id);
           return {};
         }
+        const p = action.props ?? {};
         const layer: RenderLayer = {
           id: action.id,
           type: action.type,
           props: {
-            text: action.props?.text ?? '',
-            visible: action.props?.visible ?? true,
-            interactive: action.props?.interactive ?? false,
-            variant: action.props?.variant ?? 'neutral',
-            position: action.props?.position ?? 'center',
-            z: action.props?.z ?? 0,
+            text: p.text ?? '',
+            visible: p.visible ?? true,
+            interactive: p.interactive ?? false,
+            variant: p.variant ?? 'neutral',
+            position: p.position ?? 'center',
+            z: p.z ?? 0,
+            freezeTimeline: p.freezeTimeline === true,
+            dismissAfterMs: typeof p.dismissAfterMs === 'number' ? p.dismissAfterMs : undefined,
           },
         };
         this.state.upsertLayer(layer);
+        if (action.op === 'add' && layer.props.freezeTimeline) {
+          let autoResumeMs = layer.props.dismissAfterMs;
+          if ((autoResumeMs == null || autoResumeMs <= 0) && !layer.props.interactive) {
+            autoResumeMs = 5000;
+          }
+          if (typeof autoResumeMs === 'number' && autoResumeMs <= 0) autoResumeMs = undefined;
+          return { timelineHold: { layerId: action.id, autoResumeMs } };
+        }
         return {};
       }
       case 'effect.start': {
@@ -122,6 +133,14 @@ export class ActionDispatcher {
       }
       case 'level.end': {
         return { end: { result: action.result, reason: action.reason } };
+      }
+      case 'game.input.enable': {
+        this.state.setGameInputEnabled(true);
+        return {};
+      }
+      case 'game.input.disable': {
+        this.state.setGameInputEnabled(false);
+        return {};
       }
       default:
         return {};

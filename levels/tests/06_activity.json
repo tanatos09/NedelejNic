@@ -1,0 +1,84 @@
+{
+  "id": 6,
+  "type": "action",
+  "title": "06 Activity",
+  "description": "Záměrný obrat: aktivita hráče blok vyhraje, neaktivita ho prohraje. Karrel sdělí pravidla standardně, bez zdůraznění obratu a bez komentáře ironie.",
+
+  "karrel": {
+    "memoryDefaults": { "presence": "quiet" },
+    "behaviors": [
+      {
+        "whenAny": ["click", "mouseMove", "keyboard", "scroll", "touch"],
+        "then": [
+          { "do": "text.set", "slot": "caption", "text": "[Aktivita zaznamenána]" },
+          { "do": "text.set", "slot": "subtitle", "text": "Záznam přijat." },
+          { "do": "audio.play", "kind": "voice", "file": "6-win.mp3", "loop": false, "volume": 1 },
+          { "do": "level.end", "result": "success" }
+        ]
+      }
+    ]
+  },
+
+  "assets": {
+    "voices": [
+      "6-1.mp3", "6-2.mp3", "6-3.mp3", "6-4.mp3", "6-5.mp3", "6-win.mp3", "6-fail.mp3",
+      "6-close-win.mp3", "6-close-fail.mp3"
+    ],
+    "music": [],
+    "sounds": []
+  },
+
+  "rules": {
+    "click": "allowed",
+    "mouseMove": "allowed",
+    "keyboard": "allowed",
+    "scroll": "allowed",
+    "touch": "allowed"
+  },
+
+  "end": { "type": "timer", "time": 38 },
+
+  "ending": {
+    "success": {
+      "caption": "[Blok 06 uzavřen]",
+      "subtitle": "Aktivita zaznamenána. Blok splněn.",
+      "voice": "6-close-win.mp3",
+      "holdMs": 4500
+    },
+    "fail": {
+      "caption": "[Blok 06 ukončen]",
+      "subtitle": "Bez aktivity. Blok nesplněn.",
+      "voice": "6-close-fail.mp3",
+      "holdMs": 4500
+    }
+  },
+
+  "timeline": [
+    { "at": "0s", "do": "game.input.disable" },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "[Spuštění bloku 06]" },
+
+    { "at": "2s", "do": "text.set", "slot": "caption", "text": "" },
+    { "at": "2s", "do": "text.set", "slot": "subtitle", "text": "Pokračujeme." },
+    { "at": "2s", "do": "audio.play", "kind": "voice", "file": "6-1.mp3", "loop": false, "volume": 1 },
+
+    { "at": "5s", "do": "text.set", "slot": "subtitle", "text": "Tento blok vyžaduje činnost." },
+    { "at": "5s", "do": "audio.play", "kind": "voice", "file": "6-2.mp3", "loop": false, "volume": 1 },
+
+    { "at": "9s", "do": "text.set", "slot": "subtitle", "text": "Proveď jakýkoli úkon." },
+    { "at": "9s", "do": "audio.play", "kind": "voice", "file": "6-3.mp3", "loop": false, "volume": 1 },
+
+    { "at": "12s", "do": "text.set", "slot": "subtitle", "text": "Pohyb, klik nebo klávesa." },
+    { "at": "12s", "do": "audio.play", "kind": "voice", "file": "6-4.mp3", "loop": false, "volume": 1 },
+
+    { "at": "15s", "do": "text.set", "slot": "subtitle", "text": "Až budeš připraven." },
+    { "at": "15s", "do": "audio.play", "kind": "voice", "file": "6-5.mp3", "loop": false, "volume": 1 },
+
+    { "at": "16s", "do": "text.set", "slot": "subtitle", "text": "" },
+    { "at": "16s", "do": "game.input.enable" },
+
+    { "at": "36s", "do": "text.set", "slot": "caption", "text": "[Blok nesplněn]" },
+    { "at": "36s", "do": "text.set", "slot": "subtitle", "text": "Žádná aktivita nebyla zaznamenána." },
+    { "at": "36s", "do": "audio.play", "kind": "voice", "file": "6-fail.mp3", "loop": false, "volume": 1 },
+    { "at": "38s", "do": "level.end", "result": "fail", "reason": "Nebyla zaznamenána žádná aktivita." }
+  ]
+}

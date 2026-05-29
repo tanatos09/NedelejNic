@@ -1,0 +1,76 @@
+{
+  "id": 10,
+  "type": "action",
+  "title": "10 Grandmother",
+  "description": "Dělej nic. Karrel upozorní, že pokud hráč nepohne myší, bude okradena babička. Výsledky jsou asymetrické: pohyb = prohra, klid = výhra. V obou případech Karrel oznámí stejnou neutrální statistiku. Žádný morbidní ani emotivní tón.",
+
+  "karrel": {
+    "memoryDefaults": { "presence": "quiet" },
+    "behaviors": [
+      {
+        "whenAny": ["click", "mouseMove", "keyboard", "scroll", "touch"],
+        "then": [
+          { "do": "text.set", "slot": "caption", "text": "[Pohyb zaznamenán]" },
+          { "do": "audio.play", "kind": "voice", "file": "10-move.mp3", "loop": false, "volume": 1 },
+          { "do": "level.end", "result": "fail", "reason": "Pohyb byl zaznamenán. Na situaci to nemělo žádný vliv. Statisticky je každých jedenáct sekund na světě okradena jedna babička." }
+        ]
+      }
+    ]
+  },
+
+  "assets": {
+    "voices": [ "10-1.mp3", "10-2.mp3", "10-3.mp3", "10-move.mp3", "10-stay.mp3", "10-close-win.mp3", "10-close-fail.mp3" ],
+    "music": [],
+    "sounds": []
+  },
+
+  "rules": {
+    "click": "allowed",
+    "mouseMove": "allowed",
+    "keyboard": "allowed",
+    "scroll": "allowed",
+    "touch": "allowed"
+  },
+
+  "end": { "type": "timer", "time": 38 },
+
+  "ending": {
+    "success": {
+      "caption": "[Blok 10 uzavřen]",
+      "subtitle": "Klid potvrzen. Statistika nezměněna.",
+      "voice": "10-close-win.mp3",
+      "holdMs": 4500
+    },
+    "fail": {
+      "caption": "[Blok 10 ukončen]",
+      "subtitle": "Pohyb zaznamenán. Statistika nezměněna.",
+      "voice": "10-close-fail.mp3",
+      "holdMs": 4500
+    }
+  },
+
+  "timeline": [
+    { "at": "0s", "do": "game.input.disable" },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "[Spuštění bloku 10]" },
+
+    { "at": "2s", "do": "text.set", "slot": "caption", "text": "" },
+    { "at": "2s", "do": "text.set", "slot": "subtitle", "text": "Krátké upozornění." },
+    { "at": "2s", "do": "audio.play", "kind": "voice", "file": "10-1.mp3", "loop": false, "volume": 1 },
+
+    { "at": "5s", "do": "text.set", "slot": "subtitle", "text": "Pokud během následujících dvaceti sekund nepohneš myší, bude okradena babička." },
+    { "at": "5s", "do": "audio.play", "kind": "voice", "file": "10-2.mp3", "loop": false, "volume": 1 },
+
+    { "at": "11s", "do": "text.set", "slot": "subtitle", "text": "To je vše." },
+    { "at": "11s", "do": "audio.play", "kind": "voice", "file": "10-3.mp3", "loop": false, "volume": 1 },
+
+    { "at": "13s", "do": "text.set", "slot": "subtitle", "text": "" },
+    { "at": "13s", "do": "text.set", "slot": "caption", "text": "[Pozorování aktivní]" },
+    { "at": "13s", "do": "game.input.enable" },
+
+    { "at": "33s", "do": "game.input.disable" },
+    { "at": "33s", "do": "text.set", "slot": "caption", "text": "[Záznam uzavřen]" },
+    { "at": "33s", "do": "text.set", "slot": "subtitle", "text": "Nepohnul jsi myší. Na situaci to nemělo žádný vliv. Statisticky je každých jedenáct sekund na světě okradena jedna babička." },
+    { "at": "33s", "do": "audio.play", "kind": "voice", "file": "10-stay.mp3", "loop": false, "volume": 1 },
+    { "at": "38s", "do": "level.end", "result": "success" }
+  ]
+}

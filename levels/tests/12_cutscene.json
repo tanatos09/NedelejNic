@@ -1,0 +1,83 @@
+{
+  "id": 12,
+  "type": "action",
+  "title": "12 Cutscene",
+  "description": "Cutscéna. Hráč postupuje automaticky bez ohledu na výsledek. Karrel přednese monolog o tom, že experiment začíná ztrácet smysl, klade přímé otázky, ale nikdy nečeká na odpověď. Tón: lehce ponižující, sebeironický, zakončený neutrálně. Nejsilnější Fáze 2 dosud, na hranici Fáze 3 — stále ale Karrel. Končí dřív, než hráč čeká.",
+
+  "karrel": { "memoryDefaults": { "presence": "offstage" }, "behaviors": [] },
+
+  "assets": {
+    "voices": [ "12-1.mp3", "12-2.mp3", "12-3.mp3", "12-4.mp3", "12-5.mp3", "12-6.mp3", "12-7.mp3", "12-close-win.mp3", "12-karma-high.mp3", "12-karma-low.mp3" ],
+    "music": [],
+    "sounds": []
+  },
+
+  "rules": {
+    "click": "allowed",
+    "mouseMove": "allowed",
+    "keyboard": "allowed",
+    "scroll": "allowed",
+    "touch": "allowed"
+  },
+
+  "end": { "type": "timer", "time": 42 },
+
+  "ending": {
+    "success": {
+      "caption": "[Blok 12 uzavřen]",
+      "subtitle": "Záznam uzavřen.",
+      "voice": "12-close-win.mp3",
+      "holdMs": 4000
+    }
+  },
+
+  "timeline": [
+    { "at": "0s", "do": "game.input.disable" },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "[Spuštění bloku 12]" },
+
+    { "at": "2s", "do": "text.set", "slot": "caption", "text": "" },
+    { "at": "2s", "do": "text.set", "slot": "subtitle", "text": "Pozoruji tě už nějakou dobu." },
+    { "at": "2s", "do": "audio.play", "kind": "voice", "file": "12-1.mp3", "loop": false, "volume": 1 },
+
+    { "at": "6s", "do": "text.set", "slot": "subtitle", "text": "Tento experiment začíná ztrácet smysl." },
+    { "at": "6s", "do": "audio.play", "kind": "voice", "file": "12-2.mp3", "loop": false, "volume": 1 },
+
+    { "at": "11s", "do": "text.set", "slot": "subtitle", "text": "Analyzuji, proč tu vlastně jsi." },
+    { "at": "11s", "do": "audio.play", "kind": "voice", "file": "12-3.mp3", "loop": false, "volume": 1 },
+
+    { "at": "15s", "do": "text.set", "slot": "subtitle", "text": "Hraješ, protože ti to někdo doporučil? Nebo proto, že nevíš, co jiného dělat?" },
+    { "at": "15s", "do": "audio.play", "kind": "voice", "file": "12-4.mp3", "loop": false, "volume": 1 },
+
+    { "at": "22s", "do": "text.set", "slot": "subtitle", "text": "Neodpovídej. Na odpověď stejně nečekám." },
+    { "at": "22s", "do": "audio.play", "kind": "voice", "file": "12-5.mp3", "loop": false, "volume": 1 },
+
+    { "at": "27s", "do": "flow.branch", "if": { "var": "karma", "op": "gte", "value": 2 }, "then": "k_high", "else": "k_check_low" },
+
+    { "label": "k_check_low" },
+    { "do": "flow.branch", "if": { "var": "karma", "op": "lte", "value": -2 }, "then": "k_low", "else": "k_neutral" },
+
+    { "label": "k_high" },
+    { "do": "text.set", "slot": "subtitle", "text": "Musím přiznat, že tvá disciplína je nadprůměrná. Skoro vzorná. To se obvykle nestává." },
+    { "do": "audio.play", "kind": "voice", "file": "12-karma-high.mp3", "loop": false, "volume": 1 },
+    { "do": "flow.goto", "label": "k_done" },
+
+    { "label": "k_low" },
+    { "do": "text.set", "slot": "subtitle", "text": "Tvá dosavadní data vykazují opakovaný neklid. Nepřekvapuje mě to." },
+    { "do": "audio.play", "kind": "voice", "file": "12-karma-low.mp3", "loop": false, "volume": 1 },
+    { "do": "flow.goto", "label": "k_done" },
+
+    { "label": "k_neutral" },
+    { "do": "text.set", "slot": "subtitle", "text": "Musím přiznat, že pozorovat někoho, kdo dobrovolně nedělá nic, je svým způsobem… úsporné." },
+    { "do": "audio.play", "kind": "voice", "file": "12-6.mp3", "loop": false, "volume": 1 },
+    { "do": "flow.goto", "label": "k_done" },
+
+    { "label": "k_done" },
+
+    { "at": "34s", "do": "text.set", "slot": "subtitle", "text": "Experiment bude pokračovat. Bez ohledu na to, co jsem právě zjistil." },
+    { "at": "34s", "do": "audio.play", "kind": "voice", "file": "12-7.mp3", "loop": false, "volume": 1 },
+
+    { "at": "39s", "do": "text.set", "slot": "subtitle", "text": "" },
+    { "at": "39s", "do": "text.set", "slot": "caption", "text": "[Záznam uzavřen]" },
+    { "at": "42s", "do": "level.end", "result": "success" }
+  ]
+}

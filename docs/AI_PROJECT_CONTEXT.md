@@ -24,6 +24,8 @@ Tato sekce doplňuje vizi o **skutečnost**; detailní mapa: [`PROJECT_OVERVIEW.
 - **Levely** se ukládají jako **JSON v `levels/`**; server je načítá a **podepisuje**, negeneruje je procedurálně v JS (žádný `generateLevel(levelNum)` ve stylu starého návrhu).
 - **Runtime enginu** na klientovi je **`LevelRunner` + `TimelineScheduler`** (`client/src/engine/newEngine/`), ne starý `LevelEngine` jako hlavní smyčka.
 - **0 requestů během hraní levelu** — stále platí: po načtení konfigurace a preloadu assetů se během `playing` nevolá API.
+- **Závěrečné hlášky** (`level.ending`) a **karmické skóre** (`karma`, lokální fallback v `client/src/services/karma.ts`, výhra +1 / prohra −1) jsou implementované; level může karmu číst přes `flow.branch` / Karrel `whenVar`. Po skončení levelu vede tlačítko **Pokračovat** na `id + 1`.
+- Tvorba levelů: kompletní příručka v [`LEVEL_AUTHORING_GUIDE.md`](./LEVEL_AUTHORING_GUIDE.md).
 - **Admin dashboard**, role, audit — implementováno (viz `docs/ADMIN_API_CONTRACT.md`).
 - Produktová **vize** níže (100+ levelů, placený balíček, streamer módy) je **cíl**, ne vždy hotový kód.
 

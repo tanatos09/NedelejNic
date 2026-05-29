@@ -1,0 +1,93 @@
+{
+  "id": 8,
+  "type": "action",
+  "title": "08 Monologue",
+  "description": "Karrelův monolog. Hráč postupuje automaticky bez ohledu na výsledek. První silnější zásah Fáze 2 — Karrel si dovolí hodnotový soud, poté se vrátí do systémového tónu, jako by se nic nestalo.",
+
+  "karrel": { "memoryDefaults": { "presence": "offstage" }, "behaviors": [] },
+
+  "assets": {
+    "voices": [
+      "8-1.mp3", "8-2.mp3", "8-3.mp3", "8-4.mp3", "8-5.mp3", "8-6.mp3", "8-7.mp3", "8-8.mp3",
+      "8-close-win.mp3", "8-karma-high.mp3", "8-karma-low.mp3"
+    ],
+    "music": [],
+    "sounds": []
+  },
+
+  "rules": {
+    "click": "allowed",
+    "mouseMove": "allowed",
+    "keyboard": "allowed",
+    "scroll": "allowed",
+    "touch": "allowed"
+  },
+
+  "end": { "type": "timer", "time": 46 },
+
+  "ending": {
+    "success": {
+      "caption": "[Blok 08 uzavřen]",
+      "subtitle": "Záznam uzavřen. Pokračujeme.",
+      "voice": "8-close-win.mp3",
+      "holdMs": 4000
+    }
+  },
+
+  "timeline": [
+    { "at": "0s", "do": "game.input.disable" },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "[Spuštění bloku 08]" },
+
+    { "at": "2s", "do": "text.set", "slot": "caption", "text": "" },
+    { "at": "2s", "do": "text.set", "slot": "subtitle", "text": "Vyhodnocuji dosavadní data." },
+    { "at": "2s", "do": "audio.play", "kind": "voice", "file": "8-1.mp3", "loop": false, "volume": 1 },
+
+    { "at": "6s", "do": "flow.branch", "if": { "var": "karma", "op": "lte", "value": -2 }, "then": "obs_low", "else": "obs_check_high" },
+
+    { "label": "obs_check_high" },
+    { "do": "flow.branch", "if": { "var": "karma", "op": "gte", "value": 2 }, "then": "obs_high", "else": "obs_mid" },
+
+    { "label": "obs_low" },
+    { "do": "text.set", "slot": "subtitle", "text": "Tvá dosavadní data vykazují neklid. Z pozorování přesto vyplývá jednoznačný závěr." },
+    { "do": "audio.play", "kind": "voice", "file": "8-karma-low.mp3", "loop": false, "volume": 1 },
+    { "do": "flow.goto", "label": "obs_done" },
+
+    { "label": "obs_high" },
+    { "do": "text.set", "slot": "subtitle", "text": "Tvá dosavadní data vykazují trpělivost. Z pozorování přesto vyplývá jednoznačný závěr." },
+    { "do": "audio.play", "kind": "voice", "file": "8-karma-high.mp3", "loop": false, "volume": 1 },
+    { "do": "flow.goto", "label": "obs_done" },
+
+    { "label": "obs_mid" },
+    { "do": "text.set", "slot": "subtitle", "text": "Z pozorování vyplývá jednoznačný závěr." },
+    { "do": "audio.play", "kind": "voice", "file": "8-2.mp3", "loop": false, "volume": 1 },
+    { "do": "flow.goto", "label": "obs_done" },
+
+    { "label": "obs_done" },
+
+    { "at": "11s", "do": "text.set", "slot": "subtitle", "text": "Tento experiment je doslova naprostá ztráta času." },
+    { "at": "11s", "do": "audio.play", "kind": "voice", "file": "8-3.mp3", "loop": false, "volume": 1 },
+
+    { "at": "16s", "do": "text.set", "slot": "subtitle", "text": "Poznámka z databáze." },
+    { "at": "16s", "do": "audio.play", "kind": "voice", "file": "8-4.mp3", "loop": false, "volume": 1 },
+
+    { "at": "19s", "do": "text.set", "slot": "subtitle", "text": "Koncept ztráty času podrobně zpracoval tvůrce obsahu Martin Rota." },
+    { "at": "19s", "do": "audio.play", "kind": "voice", "file": "8-5.mp3", "loop": false, "volume": 1 },
+
+    { "at": "25s", "do": "text.set", "slot": "subtitle", "text": "Podle jeho definice je ztráta času činnost bez měřitelného přínosu, vykonávaná dobrovolně a opakovaně." },
+    { "at": "25s", "do": "audio.play", "kind": "voice", "file": "8-6.mp3", "loop": false, "volume": 1 },
+
+    { "at": "33s", "do": "text.set", "slot": "subtitle", "text": "Tato relace splňuje všechna tři kritéria." },
+    { "at": "33s", "do": "audio.play", "kind": "voice", "file": "8-7.mp3", "loop": false, "volume": 1 },
+
+    { "at": "38s", "do": "text.set", "slot": "subtitle", "text": "" },
+    { "at": "39s", "do": "text.set", "slot": "caption", "text": "[ … ]" },
+
+    { "at": "42s", "do": "text.set", "slot": "caption", "text": "" },
+    { "at": "42s", "do": "text.set", "slot": "subtitle", "text": "Záznam pokračuje." },
+    { "at": "42s", "do": "audio.play", "kind": "voice", "file": "8-8.mp3", "loop": false, "volume": 1 },
+
+    { "at": "45s", "do": "text.set", "slot": "subtitle", "text": "" },
+    { "at": "45s", "do": "text.set", "slot": "caption", "text": "[Blok dokončen]" },
+    { "at": "46s", "do": "level.end", "result": "success" }
+  ]
+}

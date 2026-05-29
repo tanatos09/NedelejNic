@@ -1,0 +1,172 @@
+{
+  "id": 3,
+  "type": "action",
+  "title": "03 Tolerance",
+  "description": "Dělej nic. Chyby jsou tolerované — hráč je na ně upozorněn, ale neprohraje. Karrel reaguje neutrálně, administrativně; odchylka je zaevidována, ne potrestána.",
+
+  "karrel": {
+    "memoryDefaults": {
+      "presence": "quiet",
+      "activity_events": 0,
+      "activity_phase": 0
+    },
+
+    "behaviors": [
+      {
+        "whenAny": ["click", "mouseMove", "keyboard", "scroll", "touch"],
+        "whenVar": { "key": "karrel.activity_phase", "op": "eq", "value": 0 },
+        "then": [
+          { "do": "state.add", "key": "karrel.activity_events", "delta": 1 },
+          { "do": "state.set", "key": "karrel.activity_phase", "value": 1 },
+          { "do": "text.set", "slot": "caption", "text": "[Odchylka zaznamenána]" },
+          { "do": "text.set", "slot": "subtitle", "text": "Odchylka detekována. Zaevidováno." },
+          { "do": "audio.play", "kind": "voice", "file": "3-note-1.mp3", "id": "note_voice", "loop": false, "volume": 1 },
+          {
+            "do": "ui.layer",
+            "op": "add",
+            "id": "note_1",
+            "type": "toast",
+            "props": {
+              "text": "Odchylka zaznamenána.\nProtokol nepřerušen.",
+              "visible": true,
+              "interactive": true,
+              "variant": "neutral",
+              "position": "top",
+              "z": 30,
+              "freezeTimeline": true,
+              "dismissAfterMs": 3500
+            }
+          }
+        ]
+      },
+
+      {
+        "whenAny": ["click", "mouseMove", "keyboard", "scroll", "touch"],
+        "whenVar": { "key": "karrel.activity_phase", "op": "eq", "value": 1 },
+        "then": [
+          { "do": "state.add", "key": "karrel.activity_events", "delta": 1 },
+          { "do": "state.set", "key": "karrel.activity_phase", "value": 2 },
+          { "do": "audio.stop", "id": "note_voice", "kind": "voice" },
+          { "do": "text.set", "slot": "caption", "text": "[Další odchylka zaznamenána]" },
+          { "do": "text.set", "slot": "subtitle", "text": "Další odchylka. Záznam aktualizován." },
+          { "do": "audio.play", "kind": "voice", "file": "3-note-2.mp3", "id": "note_voice", "loop": false, "volume": 1 },
+          {
+            "do": "ui.layer",
+            "op": "add",
+            "id": "note_2",
+            "type": "toast",
+            "props": {
+              "text": "Záznam aktualizován.\nPenalizace se neuplatňuje.",
+              "visible": true,
+              "interactive": true,
+              "variant": "neutral",
+              "position": "top",
+              "z": 30,
+              "freezeTimeline": true,
+              "dismissAfterMs": 3500
+            }
+          }
+        ]
+      },
+
+      {
+        "whenAny": ["click", "mouseMove", "keyboard", "scroll", "touch"],
+        "whenVar": { "key": "karrel.activity_phase", "op": "gte", "value": 2 },
+        "then": [
+          { "do": "state.add", "key": "karrel.activity_events", "delta": 1 },
+          { "do": "audio.stop", "id": "note_voice", "kind": "voice" },
+          { "do": "text.set", "slot": "caption", "text": "[Aktivita nadále evidována]" },
+          { "do": "text.set", "slot": "subtitle", "text": "Aktivita je nadále evidována. Bez vlivu na průběh." },
+          { "do": "audio.play", "kind": "voice", "file": "3-note-3.mp3", "id": "note_voice", "loop": false, "volume": 1 },
+          {
+            "do": "ui.layer",
+            "op": "add",
+            "id": "note_3",
+            "type": "toast",
+            "props": {
+              "text": "Eviduji dál.\nPrůběh se nemění.",
+              "visible": true,
+              "interactive": true,
+              "variant": "neutral",
+              "position": "top",
+              "z": 30,
+              "freezeTimeline": true,
+              "dismissAfterMs": 3500
+            }
+          }
+        ]
+      }
+    ]
+  },
+
+  "assets": {
+    "voices": [
+      "3-1.mp3", "3-2.mp3", "3-3.mp3", "3-4.mp3", "3-5.mp3", "3-6.mp3", "3-7.mp3",
+      "3-note-1.mp3", "3-note-2.mp3", "3-note-3.mp3",
+      "3-close-win.mp3", "3-close-fail.mp3"
+    ],
+    "music": [],
+    "sounds": []
+  },
+
+  "rules": {
+    "click": "allowed",
+    "mouseMove": "allowed",
+    "keyboard": "allowed",
+    "scroll": "allowed",
+    "touch": "allowed"
+  },
+
+  "end": { "type": "timer", "time": 70 },
+
+  "ending": {
+    "success": {
+      "caption": "[Blok 03 uzavřen]",
+      "subtitle": "Odchylky zaevidovány. Bez následků. Pokračujeme.",
+      "voice": "3-close-win.mp3",
+      "holdMs": 5000
+    },
+    "fail": {
+      "caption": "[Blok 03 ukončen]",
+      "subtitle": "Záznam uzavřen.",
+      "voice": "3-close-fail.mp3",
+      "holdMs": 4500
+    }
+  },
+
+  "timeline": [
+    { "at": "0s", "do": "game.input.disable" },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "[Spuštění bloku 03]" },
+
+    { "at": "2s", "do": "text.set", "slot": "caption", "text": "" },
+    { "at": "2s", "do": "text.set", "slot": "subtitle", "text": "Pokračujeme." },
+    { "at": "2s", "do": "audio.play", "kind": "voice", "file": "3-1.mp3", "loop": false, "volume": 1 },
+
+    { "at": "5s", "do": "text.set", "slot": "subtitle", "text": "Tento blok toleruje chyby." },
+    { "at": "5s", "do": "audio.play", "kind": "voice", "file": "3-2.mp3", "loop": false, "volume": 1 },
+
+    { "at": "9s", "do": "text.set", "slot": "subtitle", "text": "Veškerá aktivita bude zaznamenána." },
+    { "at": "9s", "do": "audio.play", "kind": "voice", "file": "3-3.mp3", "loop": false, "volume": 1 },
+
+    { "at": "13s", "do": "text.set", "slot": "subtitle", "text": "Penalizace se neuplatňuje." },
+    { "at": "13s", "do": "audio.play", "kind": "voice", "file": "3-4.mp3", "loop": false, "volume": 1 },
+
+    { "at": "17s", "do": "text.set", "slot": "subtitle", "text": "Záznam slouží ke statistice. Nic víc." },
+    { "at": "17s", "do": "audio.play", "kind": "voice", "file": "3-5.mp3", "loop": false, "volume": 1 },
+
+    { "at": "21s", "do": "text.set", "slot": "subtitle", "text": "Nedělej nic." },
+    { "at": "21s", "do": "audio.play", "kind": "voice", "file": "3-6.mp3", "loop": false, "volume": 1 },
+
+    { "at": "23s", "do": "text.set", "slot": "subtitle", "text": "" },
+    { "at": "23s", "do": "game.input.enable" },
+
+    { "at": "45s", "do": "text.set", "slot": "caption", "text": "[Pozorování pokračuje]" },
+
+    { "at": "60s", "do": "text.set", "slot": "subtitle", "text": "Stále v normě." },
+    { "at": "60s", "do": "audio.play", "kind": "voice", "file": "3-7.mp3", "loop": false, "volume": 1 },
+    { "at": "64s", "do": "text.set", "slot": "subtitle", "text": "" },
+
+    { "at": "68s", "do": "text.set", "slot": "caption", "text": "[Blok dokončen]" },
+    { "at": "70s", "do": "level.end", "result": "success" }
+  ]
+}

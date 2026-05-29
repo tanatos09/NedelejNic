@@ -1,0 +1,78 @@
+{
+  "id": 9,
+  "type": "action",
+  "title": "09 Captcha",
+  "description": "Po monologu o ztrátě času přichází ověření identity. Hráč musí označit obrázek s motorkou. Splnění = výhra, nesprávný výběr nebo čekání bez akce = prohra. Karrel captchu uvede jako standardní protokol; ironii nikdy nekomentuje.",
+
+  "karrel": { "memoryDefaults": { "presence": "quiet" }, "behaviors": [] },
+
+  "assets": {
+    "voices": [ "9-1.mp3", "9-2.mp3", "9-3.mp3", "9-fail.mp3", "9-close-win.mp3", "9-close-fail.mp3" ],
+    "music": [],
+    "sounds": []
+  },
+
+  "rules": {
+    "click": "allowed",
+    "mouseMove": "allowed",
+    "keyboard": "allowed",
+    "scroll": "allowed",
+    "touch": "allowed"
+  },
+
+  "end": { "type": "timer", "time": 34 },
+
+  "ending": {
+    "success": {
+      "caption": "[Ověření dokončeno]",
+      "subtitle": "Identita ověřena. Pravděpodobně.",
+      "voice": "9-close-win.mp3",
+      "holdMs": 4500
+    },
+    "fail": {
+      "caption": "[Ověření zrušeno]",
+      "subtitle": "Ověření selhalo. Záznam uzavřen.",
+      "voice": "9-close-fail.mp3",
+      "holdMs": 4500
+    }
+  },
+
+  "timeline": [
+    { "at": "0s", "do": "game.input.disable" },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "[Spuštění bloku 09]" },
+
+    { "at": "2s", "do": "text.set", "slot": "caption", "text": "" },
+    { "at": "2s", "do": "text.set", "slot": "subtitle", "text": "Vyžaduji ověření identity." },
+    { "at": "2s", "do": "audio.play", "kind": "voice", "file": "9-1.mp3", "loop": false, "volume": 1 },
+
+    { "at": "6s", "do": "text.set", "slot": "subtitle", "text": "Standardní bezpečnostní protokol." },
+    { "at": "6s", "do": "audio.play", "kind": "voice", "file": "9-2.mp3", "loop": false, "volume": 1 },
+
+    { "at": "10s", "do": "text.set", "slot": "subtitle", "text": "Označ obrázek, na kterém je motorka." },
+    { "at": "10s", "do": "audio.play", "kind": "voice", "file": "9-3.mp3", "loop": false, "volume": 1 },
+
+    { "at": "13s", "do": "text.set", "slot": "caption", "text": "[Ověření aktivní]" },
+
+    { "at": "13s", "do": "ui.layer", "op": "add", "id": "cell_tl", "type": "image", "props": { "text": "🚗", "interactive": true, "variant": "neutral", "position": "topLeft", "z": 20 } },
+    { "at": "13s", "do": "ui.layer", "op": "add", "id": "cell_t", "type": "image", "props": { "text": "🚲", "interactive": true, "variant": "neutral", "position": "top", "z": 20 } },
+    { "at": "13s", "do": "ui.layer", "op": "add", "id": "cell_tr", "type": "image", "props": { "text": "🏍️", "interactive": true, "variant": "neutral", "position": "topRight", "z": 20 } },
+    { "at": "13s", "do": "ui.layer", "op": "add", "id": "cell_bl", "type": "image", "props": { "text": "🚌", "interactive": true, "variant": "neutral", "position": "bottomLeft", "z": 20 } },
+    { "at": "13s", "do": "ui.layer", "op": "add", "id": "cell_b", "type": "image", "props": { "text": "🚕", "interactive": true, "variant": "neutral", "position": "bottom", "z": 20 } },
+    { "at": "13s", "do": "ui.layer", "op": "add", "id": "cell_br", "type": "image", "props": { "text": "🚚", "interactive": true, "variant": "neutral", "position": "bottomRight", "z": 20 } },
+
+    { "at": "13s", "do": "trap.set", "id": "t_moto", "enabled": true, "kind": "uiTarget", "match": { "layerId": "cell_tr", "action": "click" }, "result": { "type": "success" } },
+    { "at": "13s", "do": "trap.set", "id": "t_w_tl", "enabled": true, "kind": "uiTarget", "match": { "layerId": "cell_tl", "action": "click" }, "result": { "type": "fail", "reason": "Nesprávný výběr. Ověření selhalo." } },
+    { "at": "13s", "do": "trap.set", "id": "t_w_t", "enabled": true, "kind": "uiTarget", "match": { "layerId": "cell_t", "action": "click" }, "result": { "type": "fail", "reason": "Nesprávný výběr. Ověření selhalo." } },
+    { "at": "13s", "do": "trap.set", "id": "t_w_bl", "enabled": true, "kind": "uiTarget", "match": { "layerId": "cell_bl", "action": "click" }, "result": { "type": "fail", "reason": "Nesprávný výběr. Ověření selhalo." } },
+    { "at": "13s", "do": "trap.set", "id": "t_w_b", "enabled": true, "kind": "uiTarget", "match": { "layerId": "cell_b", "action": "click" }, "result": { "type": "fail", "reason": "Nesprávný výběr. Ověření selhalo." } },
+    { "at": "13s", "do": "trap.set", "id": "t_w_br", "enabled": true, "kind": "uiTarget", "match": { "layerId": "cell_br", "action": "click" }, "result": { "type": "fail", "reason": "Nesprávný výběr. Ověření selhalo." } },
+
+    { "at": "13s", "do": "text.set", "slot": "subtitle", "text": "" },
+    { "at": "13s", "do": "game.input.enable" },
+
+    { "at": "33s", "do": "text.set", "slot": "caption", "text": "[Ověření selhalo]" },
+    { "at": "33s", "do": "text.set", "slot": "subtitle", "text": "Ověření nebylo dokončeno." },
+    { "at": "33s", "do": "audio.play", "kind": "voice", "file": "9-fail.mp3", "loop": false, "volume": 1 },
+    { "at": "34s", "do": "level.end", "result": "fail", "reason": "Ověření identity nebylo dokončeno." }
+  ]
+}

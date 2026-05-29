@@ -2,6 +2,8 @@
 
 Levely jsou **JSON soubory** v repozitáři (`levels/**/*.json`). Server je při `GET /level/:id` načte z disku, přidá **podpis** a vrátí klientovi.
 
+> **Tvoříš level?** Úplná příručka (všechny akce, Karrel, pasti, karma, závěrečné hlášky, recepty) je v [`LEVEL_AUTHORING_GUIDE.md`](./LEVEL_AUTHORING_GUIDE.md). Tento soubor je jen rychlý přehled formátu.
+
 ---
 
 ## Primární formát: `type: "action"`
@@ -48,8 +50,14 @@ Hlavní používaný tvar (viz `levels/tests/`, `server/src/levels.ts` typ `Acti
 | `end` | Typicky `{ "type": "timer", "time": <sekundy> }` — používá se v podpisu (`end.time`) a pro progress v UI. |
 | `timeline` | Pole kroků; každý má `do` (akci), volitelně `at` (`"0s"`, `"1.5s"`, `"500ms"`), `when`, `label`. |
 | `assets` | Seznam souborů pro preload: cesty v public assets (`voices` / `music` / `sounds`). |
+| `karrel` | Reakce Karrela na vstup mimo timeline (`memoryDefaults`, `behaviors`). Viz authoring guide. |
+| `ending` | Závěrečná Karrelova hláška po konci levelu: `{ "success"?: { caption?, subtitle?, voice?, holdMs? }, "fail"?: { … } }`. Přehraje se na herní obrazovce před oknem „Pokračovat". |
 
-Seznam podporovaných akcí a validace: `client/src/engine/newEngine/LevelValidator.ts`, typy v `client/src/engine/newEngine/types.ts`.
+### Karmické skóre
+
+Na začátku levelu engine nahraje proměnnou **`karma`** (lokální skóre: výhra +1, prohra −1). Level může přes `flow.branch` nebo Karrel `whenVar` měnit dialog podle skóre. Detaily v [`LEVEL_AUTHORING_GUIDE.md`](./LEVEL_AUTHORING_GUIDE.md) §9.
+
+Seznam podporovaných akcí a validace: `client/src/engine/newEngine/LevelValidator.ts`, typy v `client/src/engine/newEngine/types.ts`. **Kompletní referenci akcí a mechanik má [`LEVEL_AUTHORING_GUIDE.md`](./LEVEL_AUTHORING_GUIDE.md).**
 
 **Podpis:** server počítá `HMAC-SHA256` nad `userId:levelId:endTime`. Klient posílá stejný podpis zpět u `POST /result`.
 

@@ -27,8 +27,9 @@ Tento dokument popisuje **skutečnou implementaci** v repozitáři. Doplňuje kr
 - **Herní smyčka**: `GamePage` — fáze `loading → ready → playing → ended` (žádná „intro“ fáze).
 - **Engine**: **`LevelRunner`** + **`TimelineScheduler`** + **`ActionDispatcher`** (`client/src/engine/newEngine/`). Starší **`LevelEngine`** (`LevelEngine.ts`) a část **`InputSystem`** zůstávají v repu kvůli kompatibilitě / legacy, **produkční běh je přes `EngineHost` → LevelRunner**.
 - **Vstup**: **`InputManager`** (`engine/input/InputManager.ts`) — attach jen když `phase === 'playing'` (řídí `EngineHost.setActive`). Pravidla `forbidden | allowed | required` pro klik / myš / klávesnici / scroll / dotyk. `data-no-game-input` vylučuje UI od failů.
-- **Časová osa**: akce `text.set`, `audio.play/stop`, `ui.layer`, `effect.*`, `rules.set`, `trap.set`, `state.*`, `flow.*`, `level.end`, `hook.run`, … (viz `LevelValidator.ts` a `types.ts`).
-- **Dokončení levelu**: `finishLevel()` v `LevelRunner` synchronizuje `ended`, úklid timerů a až pak volá `onSuccess` / `onFail` (oprava rozbité výhry při přepnutí fáze).
+- **Časová osa**: akce `text.set`, `audio.play/stop`, `ui.layer` (vč. `type:"image"` dlaždic pro captcha), `effect.*`, `rules.set`, `trap.set`, `state.*`, `flow.*`, `level.end`, `game.input.enable/disable` (viz `LevelValidator.ts` a `types.ts`). *Pozn.: `hook.run` je v kódu, ale ne ve validátoru — v datových levelech se nepoužívá.*
+- **Karrel + karma**: sekce `karrel.behaviors` reaguje na vstup paralelně k timeline; levely mohou přes `flow.branch` / `whenVar` větvit dialog podle proměnné **`karma`** (lokální skóre, výhra +1 / prohra −1, `client/src/services/karma.ts`).
+- **Dokončení levelu**: `finishLevel()` v `LevelRunner` smaže UI vrstvy, přehraje volitelnou **závěrečnou hlášku** (`level.ending` → `success`/`fail`: caption, subtitle, voice, holdMs) a teprve po `holdMs` volá `onSuccess` / `onFail`. UI pak ukáže okno s tlačítkem **Pokračovat** (načte `id + 1` po výhře i prohře).
 - **DEV nástroje**: pauza (X), restart engine, skip success, **debug next step** / **skip to end** (`debugNextStep`, `debugSkipToEnd`), inspektor scheduleru (`getDebugSnapshot`).
 - **Statické assety**: hlasy `/assets/voices/`, hudba `/assets/music/`, zvuky `/assets/sounds/` — hostované z `client/public/` (Vite).
 
@@ -73,6 +74,7 @@ levels/
 | Dokument | Účel |
 |----------|------|
 | `README.md` | Instalace, spuštění, stručná struktura |
+| `docs/LEVEL_AUTHORING_GUIDE.md` | **Kompletní průvodce tvorbou levelů** (akce, Karrel, pasti, karma, ending, recepty) |
 | `docs/LEVEL_FORMAT.md` | Formát JSON levelu (action + timeline) |
 | `docs/ARCHITECTURE.md` | Vrstvy FE/BE, input, fáze UI |
 | `docs/ENGINE_DESIGN.md` | Hluboký návrh akcí a scheduleru |

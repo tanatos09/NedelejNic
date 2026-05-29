@@ -12,7 +12,9 @@
  */
 
 const TOKEN_KEY = 'nedelejnic_token';
-const API_URL = 'http://localhost:3001';
+
+/** Prázdná hodnota = relativní cesty (Vite dev proxy v `vite.config.ts`). Pro produkci: `VITE_API_URL`. */
+const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 
 // Token storage utilities (same as api.ts)
 export function getToken(): string | null {
@@ -54,7 +56,7 @@ async function request<T>(
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const url = `${API_URL}${path}`;
+  const url = `${API_BASE}${path}`;
   const fetchOptions: RequestInit = {
     method,
     headers,
@@ -64,7 +66,14 @@ async function request<T>(
     fetchOptions.body = JSON.stringify(body);
   }
 
-  const response = await fetch(url, fetchOptions);
+  let response: Response;
+  try {
+    response = await fetch(url, fetchOptions);
+  } catch {
+    throw new Error(
+      'Nelze se spojit se serverem. Spusť backend (`cd server && npm run dev`), zkontroluj PostgreSQL a že port 3001 není blokovaný.'
+    );
+  }
 
   // Handle 401 - global logout
   if (response.status === 401) {

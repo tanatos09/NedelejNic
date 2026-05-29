@@ -1,0 +1,121 @@
+{
+  "id": 5,
+  "type": "action",
+  "title": "05 Silence",
+  "description": "Strukturovaný blok ve třech částech: úvod, 60 sekund ticha s průběžným komentářem, závěr. Během ticha hráč nedělá nic; jakýkoli vstup úsek předčasně ukončí.",
+
+  "karrel": {
+    "memoryDefaults": { "presence": "quiet" },
+    "behaviors": [
+      {
+        "whenAny": ["click", "mouseMove", "keyboard", "scroll", "touch"],
+        "then": [
+          { "do": "text.set", "slot": "caption", "text": "[Úsek přerušen]" },
+          { "do": "text.set", "slot": "subtitle", "text": "Experiment byl ukončen předčasně." },
+          { "do": "audio.play", "kind": "voice", "file": "5-fail.mp3", "loop": false, "volume": 1 },
+          { "do": "level.end", "result": "fail", "reason": "Tichý úsek byl přerušen." }
+        ]
+      }
+    ]
+  },
+
+  "assets": {
+    "voices": [
+      "5-1.mp3", "5-2.mp3", "5-3.mp3", "5-4.mp3", "5-5.mp3", "5-6.mp3",
+      "5-7.mp3", "5-8.mp3", "5-9.mp3", "5-10.mp3", "5-11.mp3",
+      "5-12.mp3", "5-13.mp3", "5-14.mp3", "5-fail.mp3",
+      "5-close-win.mp3", "5-close-fail.mp3"
+    ],
+    "music": [],
+    "sounds": []
+  },
+
+  "rules": {
+    "click": "allowed",
+    "mouseMove": "allowed",
+    "keyboard": "allowed",
+    "scroll": "allowed",
+    "touch": "allowed"
+  },
+
+  "end": { "type": "timer", "time": 96 },
+
+  "ending": {
+    "success": {
+      "caption": "[Blok 05 uzavřen]",
+      "subtitle": "Šedesát sekund ticha. Záznam je čistý.",
+      "voice": "5-close-win.mp3",
+      "holdMs": 4500
+    },
+    "fail": {
+      "caption": "[Blok 05 ukončen]",
+      "subtitle": "Úsek byl přerušen. Záznam neúplný.",
+      "voice": "5-close-fail.mp3",
+      "holdMs": 4500
+    }
+  },
+
+  "timeline": [
+    { "at": "0s", "do": "game.input.disable" },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "[Spuštění bloku 05]" },
+
+    { "at": "2s", "do": "text.set", "slot": "caption", "text": "" },
+    { "at": "2s", "do": "text.set", "slot": "subtitle", "text": "Tento blok má tři části." },
+    { "at": "2s", "do": "audio.play", "kind": "voice", "file": "5-1.mp3", "loop": false, "volume": 1 },
+
+    { "at": "6s", "do": "text.set", "slot": "subtitle", "text": "Nejprve krátké uvedení." },
+    { "at": "6s", "do": "audio.play", "kind": "voice", "file": "5-2.mp3", "loop": false, "volume": 1 },
+
+    { "at": "9s", "do": "text.set", "slot": "subtitle", "text": "Poté tichý úsek." },
+    { "at": "9s", "do": "audio.play", "kind": "voice", "file": "5-3.mp3", "loop": false, "volume": 1 },
+
+    { "at": "12s", "do": "text.set", "slot": "subtitle", "text": "Nakonec shrnutí." },
+    { "at": "12s", "do": "audio.play", "kind": "voice", "file": "5-4.mp3", "loop": false, "volume": 1 },
+
+    { "at": "16s", "do": "text.set", "slot": "subtitle", "text": "Následuje 60sekundový úsek experimentu." },
+    { "at": "16s", "do": "audio.play", "kind": "voice", "file": "5-5.mp3", "loop": false, "volume": 1 },
+
+    { "at": "20s", "do": "text.set", "slot": "subtitle", "text": "Experiment lze ukončit libovolnou klávesou s výjimkou F12." },
+    { "at": "20s", "do": "audio.play", "kind": "voice", "file": "5-6.mp3", "loop": false, "volume": 1 },
+
+    { "at": "24s", "do": "text.set", "slot": "subtitle", "text": "" },
+    { "at": "24s", "do": "text.set", "slot": "caption", "text": "[Tichý úsek zahájen]" },
+    { "at": "24s", "do": "game.input.enable" },
+
+    { "at": "29s", "do": "text.set", "slot": "subtitle", "text": "Záznam probíhá." },
+    { "at": "29s", "do": "audio.play", "kind": "voice", "file": "5-7.mp3", "loop": false, "volume": 1 },
+    { "at": "33s", "do": "text.set", "slot": "subtitle", "text": "" },
+
+    { "at": "42s", "do": "text.set", "slot": "subtitle", "text": "Zatím bez odchylek." },
+    { "at": "42s", "do": "audio.play", "kind": "voice", "file": "5-8.mp3", "loop": false, "volume": 1 },
+    { "at": "46s", "do": "text.set", "slot": "subtitle", "text": "" },
+
+    { "at": "57s", "do": "text.set", "slot": "subtitle", "text": "Čas plyne konstantní rychlostí. Pro jistotu to uvádím." },
+    { "at": "57s", "do": "audio.play", "kind": "voice", "file": "5-9.mp3", "loop": false, "volume": 1 },
+    { "at": "62s", "do": "text.set", "slot": "subtitle", "text": "" },
+
+    { "at": "71s", "do": "text.set", "slot": "subtitle", "text": "Je tu klid. Větší než ve většině ostatních záznamů." },
+    { "at": "71s", "do": "audio.play", "kind": "voice", "file": "5-10.mp3", "loop": false, "volume": 1 },
+    { "at": "76s", "do": "text.set", "slot": "subtitle", "text": "" },
+
+    { "at": "82s", "do": "text.set", "slot": "subtitle", "text": "Téměř hotovo." },
+    { "at": "82s", "do": "audio.play", "kind": "voice", "file": "5-11.mp3", "loop": false, "volume": 1 },
+
+    { "at": "84s", "do": "game.input.disable" },
+    { "at": "84s", "do": "text.set", "slot": "caption", "text": "[Tichý úsek dokončen]" },
+    { "at": "84s", "do": "text.set", "slot": "subtitle", "text": "" },
+
+    { "at": "86s", "do": "text.set", "slot": "subtitle", "text": "Shrnutí." },
+    { "at": "86s", "do": "audio.play", "kind": "voice", "file": "5-12.mp3", "loop": false, "volume": 1 },
+
+    { "at": "89s", "do": "text.set", "slot": "subtitle", "text": "Šedesát sekund bez zásahu." },
+    { "at": "89s", "do": "audio.play", "kind": "voice", "file": "5-13.mp3", "loop": false, "volume": 1 },
+
+    { "at": "92s", "do": "text.set", "slot": "subtitle", "text": "Uspokojivé." },
+    { "at": "92s", "do": "audio.play", "kind": "voice", "file": "5-14.mp3", "loop": false, "volume": 1 },
+
+    { "at": "95s", "do": "text.set", "slot": "subtitle", "text": "" },
+    { "at": "95s", "do": "text.set", "slot": "caption", "text": "[Blok dokončen]" },
+    { "at": "96s", "do": "level.end", "result": "success" }
+  ]
+}

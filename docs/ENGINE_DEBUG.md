@@ -102,7 +102,9 @@ Zdroj:
 - `StateStore.getRulesSnapshot()`
 - `StateStore.getTrapsSnapshot()`
 - `StateStore.getEffectsSnapshot()`
-- `StateStore.getVarsSnapshot()`
+- `StateStore.getVarsSnapshot()` (vč. `karma` nahrané při `load`)
+
+> Aktuální karma je vidět i v DEV rohu obrazovky (`X = pauza · karma N`) a na koncové obrazovce.
 
 ### 2.4 Real-time debug log
 
@@ -114,6 +116,7 @@ Event log (`EventLogEntry`) obsahuje:
 - `flow.random` volby (deterministické)
 - trap outcome (`trap.fail`, `trap.success`, `trap.setVar`)
 - asset preload timeout/missing (`asset.preload.timeout`, `asset.missing`)
+- `level.ending` (přehrání závěrečné Karrelovy hlášky před koncovým oknem)
 
 Log je jen observability:
 - nijak nemění běh scheduleru ani RNG

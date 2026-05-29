@@ -1,0 +1,424 @@
+{
+  "id": 2,
+  "type": "action",
+  "title": "02 Basic Test",
+  "description": "První skutečný test disciplíny. Hráč musí dvě minuty nedělat nic. První dva vstupy pouze pozastaví experiment a zobrazí varování. Třetí vstup znamená okamžité selhání.",
+
+  "karrel": {
+    "memoryDefaults": {
+      "presence": "quiet",
+      "activity_events": 0,
+      "activity_phase": 0
+    },
+
+    "behaviors": [
+      {
+        "whenAny": ["click", "mouseMove", "keyboard", "scroll", "touch"],
+        "whenVar": {
+          "key": "karrel.activity_phase",
+          "op": "eq",
+          "value": 0
+        },
+
+        "then": [
+          {
+            "do": "state.add",
+            "key": "karrel.activity_events",
+            "delta": 1
+          },
+
+          {
+            "do": "state.set",
+            "key": "karrel.activity_phase",
+            "value": 1
+          },
+
+          {
+            "do": "text.set",
+            "slot": "caption",
+            "text": "[Detekována aktivita]"
+          },
+
+          {
+            "do": "text.set",
+            "slot": "subtitle",
+            "text": "Lidé mívají problém nedělat nic."
+          },
+
+          {
+            "do": "audio.play",
+            "kind": "voice",
+            "file": "2-warning-1.mp3",
+            "id": "warning_1_voice",
+            "loop": false,
+            "volume": 1
+          },
+
+          {
+            "do": "ui.layer",
+            "op": "add",
+            "id": "warning_1",
+            "type": "toast",
+            "props": {
+              "text": "První chyba.\nExperiment pozastaven.",
+              "visible": true,
+              "interactive": true,
+              "variant": "warning",
+              "position": "top",
+              "z": 30,
+              "freezeTimeline": true,
+              "dismissAfterMs": 5000
+            }
+          }
+        ]
+      },
+
+      {
+        "whenAny": ["click", "mouseMove", "keyboard", "scroll", "touch"],
+        "whenVar": {
+          "key": "karrel.activity_phase",
+          "op": "eq",
+          "value": 1
+        },
+
+        "then": [
+          {
+            "do": "state.add",
+            "key": "karrel.activity_events",
+            "delta": 1
+          },
+
+          {
+            "do": "state.set",
+            "key": "karrel.activity_phase",
+            "value": 2
+          },
+
+          {
+            "do": "audio.stop",
+            "id": "warning_1_voice",
+            "kind": "voice"
+          },
+
+          {
+            "do": "text.set",
+            "slot": "caption",
+            "text": "[Další aktivita detekována]"
+          },
+
+          {
+            "do": "text.set",
+            "slot": "subtitle",
+            "text": "To už nevypadá jako náhoda."
+          },
+
+          {
+            "do": "audio.play",
+            "kind": "voice",
+            "file": "2-warning-2.mp3",
+            "id": "warning_2_voice",
+            "loop": false,
+            "volume": 1
+          },
+
+          {
+            "do": "ui.layer",
+            "op": "add",
+            "id": "warning_2",
+            "type": "toast",
+            "props": {
+              "text": "Druhá chyba.\nPoslední varování.",
+              "visible": true,
+              "interactive": true,
+              "variant": "warning",
+              "position": "top",
+              "z": 30,
+              "freezeTimeline": true,
+              "dismissAfterMs": 5000
+            }
+          }
+        ]
+      },
+
+      {
+        "whenAny": ["click", "mouseMove", "keyboard", "scroll", "touch"],
+        "whenVar": {
+          "key": "karrel.activity_phase",
+          "op": "eq",
+          "value": 2
+        },
+
+        "then": [
+          {
+            "do": "state.add",
+            "key": "karrel.activity_events",
+            "delta": 1
+          },
+
+          {
+            "do": "audio.stop",
+            "id": "warning_2_voice",
+            "kind": "voice"
+          },
+
+          {
+            "do": "text.set",
+            "slot": "caption",
+            "text": "[Experiment přerušen]"
+          },
+
+          {
+            "do": "text.set",
+            "slot": "subtitle",
+            "text": "Třetí chyba."
+          },
+
+          {
+            "do": "audio.play",
+            "kind": "voice",
+            "file": "2-fail.mp3",
+            "loop": false,
+            "volume": 1
+          },
+
+          {
+            "do": "level.end",
+            "result": "fail",
+            "reason": "Třetí aktivita detekována."
+          }
+        ]
+      }
+    ]
+  },
+
+  "assets": {
+    "voices": [
+      "2-1.mp3",
+      "2-2.mp3",
+      "2-3.mp3",
+      "2-4.mp3",
+      "2-5.mp3",
+      "2-6.mp3",
+      "2-7.mp3",
+      "2-8.mp3",
+      "2-warning-1.mp3",
+      "2-warning-2.mp3",
+      "2-fail.mp3",
+      "2-end-1.mp3",
+      "2-end-2.mp3"
+    ],
+
+    "music": [],
+    "sounds": []
+  },
+
+  "rules": {
+    "click": "allowed",
+    "mouseMove": "allowed",
+    "keyboard": "allowed",
+    "scroll": "allowed",
+    "touch": "allowed"
+  },
+
+  "end": {
+    "type": "timer",
+    "time": 120
+  },
+
+  "timeline": [
+    {
+      "at": "0s",
+      "do": "game.input.disable"
+    },
+
+    {
+      "at": "0s",
+      "do": "text.set",
+      "slot": "caption",
+      "text": "[Spuštění základního testu]"
+    },
+
+    {
+      "at": "2s",
+      "do": "text.set",
+      "slot": "caption",
+      "text": ""
+    },
+
+    {
+      "at": "2s",
+      "do": "text.set",
+      "slot": "subtitle",
+      "text": "Dobře."
+    },
+
+    {
+      "at": "2s",
+      "do": "audio.play",
+      "kind": "voice",
+      "file": "2-1.mp3",
+      "loop": false,
+      "volume": 1
+    },
+
+    {
+      "at": "6s",
+      "do": "text.set",
+      "slot": "subtitle",
+      "text": "Toto je první skutečný test."
+    },
+
+    {
+      "at": "6s",
+      "do": "audio.play",
+      "kind": "voice",
+      "file": "2-2.mp3",
+      "loop": false,
+      "volume": 1
+    },
+
+    {
+      "at": "11s",
+      "do": "text.set",
+      "slot": "subtitle",
+      "text": "Pravidla jsou jednoduchá."
+    },
+
+    {
+      "at": "11s",
+      "do": "audio.play",
+      "kind": "voice",
+      "file": "2-3.mp3",
+      "loop": false,
+      "volume": 1
+    },
+
+    {
+      "at": "15s",
+      "do": "text.set",
+      "slot": "subtitle",
+      "text": "Nedělej nic."
+    },
+
+    {
+      "at": "15s",
+      "do": "audio.play",
+      "kind": "voice",
+      "file": "2-4.mp3",
+      "loop": false,
+      "volume": 1
+    },
+
+    {
+      "at": "20s",
+      "do": "text.set",
+      "slot": "subtitle",
+      "text": "Nehýbej myší."
+    },
+
+    {
+      "at": "20s",
+      "do": "audio.play",
+      "kind": "voice",
+      "file": "2-5.mp3",
+      "loop": false,
+      "volume": 1
+    },
+
+    {
+      "at": "24s",
+      "do": "text.set",
+      "slot": "subtitle",
+      "text": "Nemačkej klávesy."
+    },
+
+    {
+      "at": "24s",
+      "do": "audio.play",
+      "kind": "voice",
+      "file": "2-6.mp3",
+      "loop": false,
+      "volume": 1
+    },
+
+    {
+      "at": "40s",
+      "do": "text.set",
+      "slot": "subtitle",
+      "text": "Začínáme."
+    },
+
+    {
+      "at": "40s",
+      "do": "audio.play",
+      "kind": "voice",
+      "file": "2-8.mp3",
+      "loop": false,
+      "volume": 1
+    },
+
+    {
+      "at": "41s",
+      "do": "game.input.enable"
+    },
+
+    {
+      "at": "70s",
+      "do": "text.set",
+      "slot": "caption",
+      "text": "[Pozorování pokračuje]"
+    },
+
+    {
+      "at": "95s",
+      "do": "text.set",
+      "slot": "caption",
+      "text": "[Subjekt zůstává neaktivní]"
+    },
+
+    {
+      "at": "108s",
+      "do": "text.set",
+      "slot": "subtitle",
+      "text": "Zajímavé."
+    },
+
+    {
+      "at": "108s",
+      "do": "audio.play",
+      "kind": "voice",
+      "file": "2-end-1.mp3",
+      "loop": false,
+      "volume": 1
+    },
+
+    {
+      "at": "114s",
+      "do": "text.set",
+      "slot": "subtitle",
+      "text": "Možná máš větší disciplínu než ostatní."
+    },
+
+    {
+      "at": "114s",
+      "do": "audio.play",
+      "kind": "voice",
+      "file": "2-end-2.mp3",
+      "loop": false,
+      "volume": 1
+    },
+
+    {
+      "at": "119s",
+      "do": "text.set",
+      "slot": "caption",
+      "text": "[Test dokončen]"
+    },
+
+    {
+      "at": "120s",
+      "do": "level.end",
+      "result": "success"
+    }
+  ]
+}

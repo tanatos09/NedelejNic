@@ -41,6 +41,10 @@ export type ActionLevelJson = {
   assets?: { voices?: string[]; music?: string[]; sounds?: string[] };
   rules?: Record<string, string>;
   end?: { type: 'timer'; time: number };
+  ending?: {
+    success?: { caption?: string; subtitle?: string; voice?: string; holdMs?: number };
+    fail?: { caption?: string; subtitle?: string; voice?: string; holdMs?: number };
+  };
   timeline?: unknown[];
   module?: string;
   signature?: string;

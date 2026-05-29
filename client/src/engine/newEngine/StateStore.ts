@@ -29,6 +29,17 @@ export class StateStore {
   private traps = new Map<string, TrapRecord>();
   private trapOrder: string[] = [];
 
+  /** Přepínač vstupů pro engine (`false` = žádné pasti / Karrel ani kontrola rules z timeline). */
+  private gameInputEnabled = true;
+
+  isGameInputEnabled(): boolean {
+    return this.gameInputEnabled;
+  }
+
+  setGameInputEnabled(value: boolean): void {
+    this.gameInputEnabled = value;
+  }
+
   getRulesSnapshot(): Rules {
     return { ...this.rules };
   }
@@ -65,6 +76,11 @@ export class StateStore {
   removeLayer(id: string): void {
     this.layers.delete(id);
     this.layerOrder = this.layerOrder.filter((x) => x !== id);
+  }
+
+  clearAllLayers(): void {
+    this.layers.clear();
+    this.layerOrder = [];
   }
 
   setEffect(type: string, data: { intensity?: number; target?: string } | null): void {

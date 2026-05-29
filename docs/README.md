@@ -5,7 +5,8 @@ Krátký přehled, co který soubor řeší. **Aktuální stav implementace**: [
 | Soubor | Obsah |
 |--------|--------|
 | [**PROJECT_OVERVIEW.md**](./PROJECT_OVERVIEW.md) | Co projekt **opravdu** dělá (engine, server, levely, síť) — *doporučený vstup* |
-| [**LEVEL_FORMAT.md**](./LEVEL_FORMAT.md) | Formát JSON levelu (`action`, timeline, pravidla) |
+| [**LEVEL_AUTHORING_GUIDE.md**](./LEVEL_AUTHORING_GUIDE.md) | **Kompletní průvodce tvorbou levelů** — všechny akce, Karrel, pasti, karma, závěrečné hlášky, recepty |
+| [**LEVEL_FORMAT.md**](./LEVEL_FORMAT.md) | Rychlý přehled formátu JSON levelu (`action`, timeline, pravidla) |
 | [**ARCHITECTURE.md**](./ARCHITECTURE.md) | Vrstvy aplikace, input, fáze GamePage, role |
 | [**ENGINE_DESIGN.md**](./ENGINE_DESIGN.md) | Detailní spec akcí, scheduleru, chování (dlouhý) |
 | [**ENGINE_HARDENING.MD**](./ENGINE_HARDENING.MD) | Neměnná runtime pravidla |

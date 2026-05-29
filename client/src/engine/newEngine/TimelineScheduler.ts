@@ -1,4 +1,13 @@
-import type { Action, AnyLevel, EngineCallbacks, EventLogEntry, InputEvent, TimelineStep, When } from './types';
+import type {
+  Action,
+  AnyLevel,
+  DispatchResult,
+  EngineCallbacks,
+  EventLogEntry,
+  InputEvent,
+  TimelineStep,
+  When,
+} from './types';
 import { parseTimeMs } from './util';
 import { RandomSystem } from './RandomSystem';
 import { TrapSystem } from './TrapSystem';
@@ -21,6 +30,8 @@ export class TimelineScheduler {
   private startEpoch = 0;
   private pausedAt = 0;
   private pausedElapsed = 0;
+  /** Když je nastaveno, virtuální čas scheduleru je zmražen (pauza / timeline hold). */
+  private pausedSnapshotElapsed: number | null = null;
 
   constructor(
     private level: AnyLevel,
@@ -31,7 +42,8 @@ export class TimelineScheduler {
     private setTimeoutFn: typeof window.setTimeout,
     private clearTimeoutFn: typeof window.clearTimeout,
     private log?: (e: EventLogEntry) => void,
-    private loopLimit: number = 20
+    private loopLimit: number = 20,
+    private onDispatchResult?: (r: DispatchResult) => void
   ) {
   }
 
@@ -49,6 +61,7 @@ export class TimelineScheduler {
     this.waiting = { kind: 'none' };
     this.ended = false;
     this.startEpoch = 0;
+    this.pausedSnapshotElapsed = null;
   }
 
   getDebugState(): {
@@ -72,6 +85,7 @@ export class TimelineScheduler {
   start(atEpochMs?: number): void {
     this.startEpoch = typeof atEpochMs === 'number' ? atEpochMs : Date.now();
     this.pausedElapsed = 0;
+    this.pausedSnapshotElapsed = null;
     this.ended = false;
     this.log?.({ t: 0, kind: 'engine', msg: 'scheduler.start', data: { steps: this.steps.length } });
     this.runLoop();
@@ -84,24 +98,35 @@ export class TimelineScheduler {
 
   pause(): void {
     if (this.ended) return;
+    if (this.pausedSnapshotElapsed != null) return;
     this.pausedAt = Date.now();
+    this.pausedSnapshotElapsed = Date.now() - this.startEpoch - this.pausedElapsed;
     this.clearWaitingTimer();
   }
 
-  resume(): void {
-    if (this.ended) return;
+  /** Vrátí délku pauzy v ms přičtenou do `pausedElapsed` (0 pokud nebyla aktivní pauza). */
+  resume(): number {
+    if (this.ended) return 0;
+    if (this.pausedSnapshotElapsed == null) {
+      this.runLoop();
+      return 0;
+    }
     const pauseDuration = Date.now() - this.pausedAt;
     this.pausedElapsed += pauseDuration;
-    // continue loop with adjusted elapsed (catch-up will happen automatically)
+    this.pausedSnapshotElapsed = null;
     this.runLoop();
+    return pauseDuration;
   }
 
   getElapsedMs(): number {
     if (!this.startEpoch) return 0;
-    if (this.pausedAt && !this.ended && this.waiting.kind !== 'none' && this.callbacks) {
-      // if paused, but resume adjusts pausedElapsed; keep simple:
-    }
+    if (this.pausedSnapshotElapsed != null) return this.pausedSnapshotElapsed;
     return Date.now() - this.startEpoch - this.pausedElapsed;
+  }
+
+  /** Virtuální čas je zmražen (DEV pauza nebo Karrel alert). */
+  isTimeFrozen(): boolean {
+    return this.pausedSnapshotElapsed != null;
   }
 
   onInput(input: InputEvent): void {
@@ -206,6 +231,7 @@ export class TimelineScheduler {
 
         const action = step as Action;
         const r = this.dispatcher.dispatch(action);
+        this.onDispatchResult?.(r);
         this.callbacks.onRenderModel(this.state.snapshotRenderModel());
 
         if (r.end) {
@@ -292,6 +318,7 @@ export class TimelineScheduler {
 
         const action = step as Action;
         const r = this.dispatcher.dispatch(action);
+        this.onDispatchResult?.(r);
         this.callbacks.onRenderModel(this.state.snapshotRenderModel());
 
         if (r.end) {

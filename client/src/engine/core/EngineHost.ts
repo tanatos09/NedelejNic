@@ -37,7 +37,11 @@ export class EngineHost {
 
   async load(
     cfg: LevelConfig,
-    opts?: { onPreloadProgress?: (loaded: number, total: number) => void }
+    opts?: {
+      onPreloadProgress?: (loaded: number, total: number) => void;
+      /** Externí proměnné nahrané do enginu před startem (např. `{ karma }`). */
+      vars?: Record<string, number | string>;
+    }
   ): Promise<void> {
     this.stop();
 
@@ -51,7 +55,7 @@ export class EngineHost {
     };
 
     this.engine = new LevelRunner(callbacks);
-    await this.engine.load(cfg as any);
+    await this.engine.load(cfg as any, { vars: opts?.vars });
     await this.engine.preload(opts?.onPreloadProgress);
   }
 

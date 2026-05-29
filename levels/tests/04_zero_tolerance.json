@@ -1,0 +1,85 @@
+{
+  "id": 4,
+  "type": "action",
+  "title": "04 Zero Tolerance",
+  "description": "Dělej nic. Nulová tolerance — jakákoliv aktivita znamená okamžitou prohru. Tón je identický s předchozím blokem; Karrel pouze konstatuje výsledek bez dramatizace.",
+
+  "karrel": {
+    "memoryDefaults": { "presence": "quiet" },
+    "behaviors": [
+      {
+        "whenAny": ["click", "mouseMove", "keyboard", "scroll", "touch"],
+        "then": [
+          { "do": "text.set", "slot": "caption", "text": "[Aktivita detekována]" },
+          { "do": "text.set", "slot": "subtitle", "text": "Aktivita detekována. Blok ukončen." },
+          { "do": "audio.play", "kind": "voice", "file": "4-fail.mp3", "loop": false, "volume": 1 },
+          { "do": "level.end", "result": "fail", "reason": "Aktivita byla detekována. Záznam uzavřen." }
+        ]
+      }
+    ]
+  },
+
+  "assets": {
+    "voices": [
+      "4-1.mp3", "4-2.mp3", "4-3.mp3", "4-4.mp3", "4-5.mp3", "4-fail.mp3",
+      "4-close-win.mp3", "4-close-fail.mp3"
+    ],
+    "music": [],
+    "sounds": []
+  },
+
+  "rules": {
+    "click": "allowed",
+    "mouseMove": "allowed",
+    "keyboard": "allowed",
+    "scroll": "allowed",
+    "touch": "allowed"
+  },
+
+  "end": { "type": "timer", "time": 90 },
+
+  "ending": {
+    "success": {
+      "caption": "[Blok 04 uzavřen]",
+      "subtitle": "Žádná aktivita. Přesně podle protokolu.",
+      "voice": "4-close-win.mp3",
+      "holdMs": 4500
+    },
+    "fail": {
+      "caption": "[Blok 04 ukončen]",
+      "subtitle": "Aktivita uzavřela blok. Zaznamenáno.",
+      "voice": "4-close-fail.mp3",
+      "holdMs": 4500
+    }
+  },
+
+  "timeline": [
+    { "at": "0s", "do": "game.input.disable" },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "[Spuštění bloku 04]" },
+
+    { "at": "2s", "do": "text.set", "slot": "caption", "text": "" },
+    { "at": "2s", "do": "text.set", "slot": "subtitle", "text": "Pokračujeme." },
+    { "at": "2s", "do": "audio.play", "kind": "voice", "file": "4-1.mp3", "loop": false, "volume": 1 },
+
+    { "at": "5s", "do": "text.set", "slot": "subtitle", "text": "Pravidla tohoto bloku jsou jednoznačná." },
+    { "at": "5s", "do": "audio.play", "kind": "voice", "file": "4-2.mp3", "loop": false, "volume": 1 },
+
+    { "at": "9s", "do": "text.set", "slot": "subtitle", "text": "Jakákoli aktivita ukončí blok." },
+    { "at": "9s", "do": "audio.play", "kind": "voice", "file": "4-3.mp3", "loop": false, "volume": 1 },
+
+    { "at": "13s", "do": "text.set", "slot": "subtitle", "text": "Nedělej nic." },
+    { "at": "13s", "do": "audio.play", "kind": "voice", "file": "4-4.mp3", "loop": false, "volume": 1 },
+
+    { "at": "15s", "do": "text.set", "slot": "subtitle", "text": "" },
+    { "at": "15s", "do": "game.input.enable" },
+
+    { "at": "40s", "do": "text.set", "slot": "caption", "text": "[Subjekt neaktivní]" },
+
+    { "at": "70s", "do": "text.set", "slot": "subtitle", "text": "V pořádku." },
+    { "at": "70s", "do": "audio.play", "kind": "voice", "file": "4-5.mp3", "loop": false, "volume": 1 },
+    { "at": "74s", "do": "text.set", "slot": "subtitle", "text": "" },
+
+    { "at": "88s", "do": "text.set", "slot": "caption", "text": "[Blok dokončen]" },
+    { "at": "90s", "do": "level.end", "result": "success" }
+  ]
+}

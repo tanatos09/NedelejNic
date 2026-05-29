@@ -48,10 +48,10 @@ GamePage (fáze UI: loading | ready | playing | ended)
 
 ## Herní fáze (GamePage)
 
-1. **loading** — `api.getLevel`, `host.load` + `preload`.
+1. **loading** — `api.getLevel`, `host.load` (vč. nahrání proměnné `karma` do enginu) + `preload`.
 2. **ready** — obrazovka „Začít nedělat nic“.
 3. **playing** — `host.start()`, běží scheduler (+ krátké „zbrojení scény“ před startem času).
-4. **ended** — výsledek, `POST /result`; PLAYER má odpočet k odhlášení.
+4. **ended** — `finishLevel()` smaže UI vrstvy, přehraje volitelnou **závěrečnou Karrelovu hlášku** (`level.ending`), aktualizuje **karmu** (+1/−1) a odešle `POST /result`. Pak se ukáže okno s tlačítkem **Pokračovat** → načte `id + 1` (po výhře i prohře).
 
 ---
 
@@ -59,7 +59,7 @@ GamePage (fáze UI: loading | ready | playing | ended)
 
 | Role | Chování (zkratka) |
 |------|-------------------|
-| PLAYER | Jen aktuální `user.level`; po skončení auto-logout odpočet. |
+| PLAYER | Jen aktuální `user.level`; po skončení tlačítko **Pokračovat** na další blok (`id + 1`). |
 | DEV | Ladící panel, libovolný level z API, success neposouvá level v DB. |
 | ADMIN | Jako DEV + admin rozhraní. |
 

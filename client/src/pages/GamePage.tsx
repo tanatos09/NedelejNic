@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { api } from '../services/api';
+import { applyResult as applyKarma, getKarma } from '../services/karma';
 import type { EngineState, EventLogEntry, RenderModel } from '../engine/newEngine/types';
 import type { User, LevelConfig } from '../types';
 import { EngineHost } from '../engine/core/EngineHost';
@@ -201,10 +202,10 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
   const [caption, setCaption] = useState('');
   const [levelResult, setLevelResult] = useState<'fail' | 'success' | null>(null);
   const [failReason, setFailReason] = useState('');
-  const [nextSecs, setNextSecs] = useState(10);
   const [error, setError] = useState<string | null>(null);
   const [renderModel, setRenderModel] = useState<RenderModel | null>(null);
   const [devDebugSnap, setDevDebugSnap] = useState<any>(null);
+  const [karma, setKarmaState] = useState<number>(() => getKarma(user.username));
 
   // Dev/Admin state
   const [devStepMode, setDevStepMode] = useState(false);
@@ -219,6 +220,8 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
   const hostRef = useRef<EngineHost | null>(null);
   const onLogoutRef = useRef(onLogout);
   useEffect(() => { onLogoutRef.current = onLogout; }, [onLogout]);
+  /** Probíhající odeslání výsledku — počkáme na něj, než načteme další blok. */
+  const pendingResultRef = useRef<Promise<unknown> | null>(null);
 
   const sessionDurationSec = useMemo(() => sessionDurationSeconds(config), [config]);
   const [countdownRemain, setCountdownRemain] = useState<number | null>(null);
@@ -281,14 +284,16 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
               console.log('[Game] engine fail', { reason });
               setLevelResult('fail');
               setFailReason(reason);
+              setKarmaState(applyKarma('fail', user.username));
               setPhase('ended');
-              api.postResult('fail', cfg.id, cfg.signature).catch(() => {});
+              pendingResultRef.current = api.postResult('fail', cfg.id, cfg.signature).catch(() => {});
             },
             onSuccess: () => {
               console.log('[Game] engine success');
               setLevelResult('success');
+              setKarmaState(applyKarma('success', user.username));
               setPhase('ended');
-              api.postResult('success', cfg.id, cfg.signature).catch(() => {});
+              pendingResultRef.current = api.postResult('success', cfg.id, cfg.signature).catch(() => {});
             },
             onProgress: () => {},
             onRenderModel: (m) => {
@@ -307,6 +312,7 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
           hostRef.current = host;
           setLoadProgress(22);
           await host.load(cfg, {
+            vars: { karma: getKarma(user.username) },
             onPreloadProgress: (loaded, total) => {
               const lo = Math.max(1, total);
               const spanStart = 28;
@@ -367,23 +373,19 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
     };
   }, [phase, devEngineState]);
 
-  // ── Auto-logout countdown (PLAYER only) ──────────────────────
-  useEffect(() => {
-    if (phase !== 'ended') return;
-    if (isDevUser) return;
-
-    setNextSecs(10);
-    let s = 10;
-    const cd = window.setInterval(() => {
-      s -= 1;
-      setNextSecs(s);
-      if (s <= 0) {
-        clearInterval(cd);
-        onLogoutRef.current();
-      }
-    }, 1000);
-    return () => clearInterval(cd);
-  }, [phase, isDevUser]);
+  // ── Pokračování do dalšího bloku ──────────────────────────────
+  // Po výhře i po prohře jdeš dál tak jako tak (next = aktuální blok + 1).
+  // Počkáme na odeslání výsledku (server inkrementuje level), pak načteme další.
+  const handleContinue = useCallback(async () => {
+    const next = (config?.id ?? user.level) + 1;
+    try {
+      await pendingResultRef.current;
+    } catch {
+      // ignore
+    }
+    pendingResultRef.current = null;
+    loadLevel(next);
+  }, [config?.id, user.level, loadLevel]);
 
   // ── DEV handlers ───────────────────────────────────────────────
   const handleDevResume = () => hostRef.current?.getEngine()?.resume();
@@ -445,7 +447,11 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
               ? 'Záznam byl uložen. Pokračujte další iterací nebo opakujte blok.'
               : failReason}
           </p>
+          <p style={styles.failClose}>Karma: {karma}</p>
           <div style={styles.devEndBtnRow}>
+            <button style={styles.continueBtn} onClick={handleContinue}>
+              POKRAČOVAT →
+            </button>
             <button style={styles.devActionBtn} onClick={handleDevRestart}>
               ↻ RESTART LEVEL
             </button>
@@ -490,22 +496,22 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
       <div style={styles.failOverlay} data-no-game-input>
         <div style={styles.failBox}>
           <p style={styles.failEyebrow}>
-            {levelResult === 'success' ? 'VÝSLEDEK POZOROVÁNÍ' : 'UKONČENÍ PROTOTYPU'}
+            {levelResult === 'success' ? 'VÝSLEDEK POZOROVÁNÍ' : 'ZÁZNAM UZAVŘEN'}
           </p>
           <p style={styles.failTitle}>
-            {levelResult === 'success' ? 'Sezení ukončeno' : 'Účast ukončena'}
+            {levelResult === 'success' ? 'Blok splněn' : 'Blok ukončen'}
           </p>
           <p style={styles.failSub}>
-            {levelResult === 'success'
-              ? 'Data byla odeslána. Děkujeme za spolupráci.'
-              : failReason}
+            {levelResult === 'success' ? 'Záznam byl uložen.' : failReason || 'Záznam byl uložen.'}
           </p>
-          <p style={styles.failClose}>
-            {nextSecs > 0 ? `Automatické ukončení přístupu za ${nextSecs} s…` : 'Odhlašuji…'}
-          </p>
-          <button style={styles.logoutBtn} onClick={() => onLogoutRef.current()}>
-            Ukončit sezení nyní
-          </button>
+          <div style={styles.endBtnRow}>
+            <button style={styles.continueBtn} onClick={handleContinue}>
+              Pokračovat
+            </button>
+            <button style={styles.logoutBtn} onClick={() => onLogoutRef.current()}>
+              Ukončit sezení
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -557,7 +563,7 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
       {/* DEV — jen nenápadná nápověda (dashboard jen z pauzy) */}
       {isDevUser && (
         <div style={styles.devCorner} data-no-game-input>
-          <span style={styles.xHint}>X = pauza</span>
+          <span style={styles.xHint}>X = pauza · karma {karma}</span>
         </div>
       )}
 
@@ -573,10 +579,17 @@ export default function GamePage({ user, onLogout, onAdmin }: Props) {
               data-layer-id={layer.id}
               style={{
                 ...styles.layerBase,
+                ...(layer.type === 'image' ? styles.imageTile : {}),
                 ...(layer.props?.position ? positionToStyle(layer.props.position) : {}),
                 zIndex: 100 + (layer.props?.z ?? 0),
                 pointerEvents: layer.props?.interactive ? 'auto' : 'none',
-                display: layer.props?.visible === false ? 'none' : 'block',
+                cursor: layer.props?.interactive ? 'pointer' : undefined,
+                display:
+                  layer.props?.visible === false
+                    ? 'none'
+                    : layer.type === 'image'
+                      ? 'flex'
+                      : 'block',
               }}
             >
               {layer.props?.text}
@@ -853,6 +866,26 @@ const styles: Record<string, React.CSSProperties> = {
     textWrap: 'balance',
   },
   failClose: { color: '#475569', fontSize: '12px', marginTop: '12px', marginBottom: 0 },
+  endBtnRow: {
+    alignItems: 'center',
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '12px',
+    justifyContent: 'center',
+    marginTop: '8px',
+  },
+  continueBtn: {
+    backgroundColor: 'rgba(21,94,117,0.45)',
+    border: '1px solid rgba(34,211,238,0.55)',
+    borderRadius: '2px',
+    color: '#ecfeff',
+    cursor: 'pointer',
+    fontSize: '13px',
+    fontWeight: 700,
+    letterSpacing: '0.06em',
+    padding: '12px 24px',
+    textTransform: 'uppercase',
+  },
   logoutBtn: {
     backgroundColor: 'transparent',
     border: '1px solid rgba(71,85,105,0.9)',
@@ -1332,6 +1365,19 @@ const styles: Record<string, React.CSSProperties> = {
     maxWidth: '420px',
     padding: '14px 16px',
     position: 'absolute',
+  },
+  // Captcha-style tile (type: 'image'): larger, square, glyph centered.
+  imageTile: {
+    alignItems: 'center',
+    display: 'flex',
+    fontSize: '52px',
+    height: '108px',
+    justifyContent: 'center',
+    lineHeight: 1,
+    maxWidth: 'none',
+    padding: 0,
+    textAlign: 'center',
+    width: '108px',
   },
   effectInvert: {
     position: 'absolute',

@@ -29,6 +29,8 @@ const ACTIONS = new Set<Action['do']>([
   'flow.branch',
   'flow.random',
   'level.end',
+  'game.input.enable',
+  'game.input.disable',
 ]);
 
 export function validateLevel(level: AnyLevel): ValidationReport {
@@ -233,6 +235,9 @@ function validateActionParams(
       return;
     case 'level.end':
       if (action.result !== 'success' && action.result !== 'fail') err('level.end.result invalid', `${base}.result`, action.result);
+      return;
+    case 'game.input.enable':
+    case 'game.input.disable':
       return;
     default:
       warn('action validator missing case', base, action);

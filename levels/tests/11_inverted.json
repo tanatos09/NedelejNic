@@ -1,0 +1,79 @@
+{
+  "id": 11,
+  "type": "action",
+  "title": "11 Inverted",
+  "description": "Obrácená pravidla. Karrel hráče vyzve, aby pohnul myší. Pohyb = prohra, klid = výhra. Hráč už Karrela zná a předpokládá určité chování; výzva zní jako naprosto standardní instrukce, bez náznaku ironie nebo varování.",
+
+  "karrel": {
+    "memoryDefaults": { "presence": "quiet" },
+    "behaviors": [
+      {
+        "whenAny": ["mouseMove"],
+        "then": [
+          { "do": "text.set", "slot": "caption", "text": "[Pohyb zaznamenán]" },
+          { "do": "audio.play", "kind": "voice", "file": "11-move.mp3", "loop": false, "volume": 1 },
+          { "do": "level.end", "result": "fail", "reason": "Pohyb byl zaznamenán. Blok nesplněn." }
+        ]
+      }
+    ]
+  },
+
+  "assets": {
+    "voices": [ "11-1.mp3", "11-2.mp3", "11-3.mp3", "11-4.mp3", "11-move.mp3", "11-end.mp3", "11-close-win.mp3", "11-close-fail.mp3" ],
+    "music": [],
+    "sounds": []
+  },
+
+  "rules": {
+    "click": "allowed",
+    "mouseMove": "allowed",
+    "keyboard": "allowed",
+    "scroll": "allowed",
+    "touch": "allowed"
+  },
+
+  "end": { "type": "timer", "time": 36 },
+
+  "ending": {
+    "success": {
+      "caption": "[Blok 11 uzavřen]",
+      "subtitle": "Žádný pohyb. Blok splněn.",
+      "voice": "11-close-win.mp3",
+      "holdMs": 4500
+    },
+    "fail": {
+      "caption": "[Blok 11 ukončen]",
+      "subtitle": "Pohyb zaznamenán. Blok nesplněn.",
+      "voice": "11-close-fail.mp3",
+      "holdMs": 4500
+    }
+  },
+
+  "timeline": [
+    { "at": "0s", "do": "game.input.disable" },
+    { "at": "0s", "do": "text.set", "slot": "caption", "text": "[Spuštění bloku 11]" },
+
+    { "at": "2s", "do": "text.set", "slot": "caption", "text": "" },
+    { "at": "2s", "do": "text.set", "slot": "subtitle", "text": "Pokračujeme." },
+    { "at": "2s", "do": "audio.play", "kind": "voice", "file": "11-1.mp3", "loop": false, "volume": 1 },
+
+    { "at": "5s", "do": "text.set", "slot": "subtitle", "text": "Tento blok vyžaduje jednoduchý úkon." },
+    { "at": "5s", "do": "audio.play", "kind": "voice", "file": "11-2.mp3", "loop": false, "volume": 1 },
+
+    { "at": "9s", "do": "text.set", "slot": "subtitle", "text": "Pohni myší." },
+    { "at": "9s", "do": "audio.play", "kind": "voice", "file": "11-3.mp3", "loop": false, "volume": 1 },
+
+    { "at": "12s", "do": "text.set", "slot": "subtitle", "text": "Až budeš připraven." },
+    { "at": "12s", "do": "audio.play", "kind": "voice", "file": "11-4.mp3", "loop": false, "volume": 1 },
+
+    { "at": "14s", "do": "text.set", "slot": "subtitle", "text": "" },
+    { "at": "14s", "do": "text.set", "slot": "caption", "text": "[Pozorování aktivní]" },
+    { "at": "14s", "do": "game.input.enable" },
+
+    { "at": "34s", "do": "game.input.disable" },
+    { "at": "34s", "do": "text.set", "slot": "caption", "text": "[Blok dokončen]" },
+    { "at": "34s", "do": "text.set", "slot": "subtitle", "text": "Nepohnul jsi myší." },
+    { "at": "34s", "do": "audio.play", "kind": "voice", "file": "11-end.mp3", "loop": false, "volume": 1 },
+    { "at": "36s", "do": "level.end", "result": "success" }
+  ]
+}

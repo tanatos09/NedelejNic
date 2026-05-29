@@ -1905,3 +1905,43 @@ Níže je mapování “typů levelů” na kombinace akčních bloků. Nejsou t
 - **Timeline je zdroj pravdy**: i “random chaos” je jen timeline branch.
 - **Custom levels nejsou nový engine**: jen plugin/hook nad ActionDispatcher + StateStore.
 
+---
+
+## Doplňky (aktuální implementace)
+
+Tato sekce doplňuje výše uvedený návrh o věci, které jsou navíc **už v kódu**. Praktická příručka pro autory levelů: [`LEVEL_AUTHORING_GUIDE.md`](./LEVEL_AUTHORING_GUIDE.md).
+
+### A) Závěrečná hláška — `level.ending`
+
+Level může mít na nejvyšší úrovni:
+
+```json
+"ending": {
+  "success": { "caption": "[…]", "subtitle": "…", "voice": "x-close-win.mp3", "holdMs": 4500 },
+  "fail":    { "caption": "[…]", "subtitle": "…", "voice": "x-close-fail.mp3", "holdMs": 4500 }
+}
+```
+
+`LevelRunner.finishLevel()` po ukončení timeline: smaže UI vrstvy (`StateStore.clearAllLayers()`), pokud existuje `ending[result]`, přehraje titulky + hlas a po `holdMs` (default 4500) teprve zavolá `onSuccess`/`onFail` (přes `finalizeEnd()`). Do event logu jde `level.ending`. `stop()` tento timer ruší jako první, aby po tvrdém stopu nic nedoběhlo.
+
+### B) Karmické skóre — proměnná `karma`
+
+Lokální skóre (`client/src/services/karma.ts`, `localStorage` per uživatel): výhra **+1**, prohra **−1**. `GamePage` ho aplikuje v `onSuccess`/`onFail` a při dalším `load` ho předá enginu jako externí proměnnou:
+
+```ts
+host.load(cfg, { vars: { karma: getKarma(username) } })
+```
+
+`EngineHost.load` → `LevelRunner.load(cfg, { vars })` → `StateStore.setVar('karma', …)` **před startem**. Levely větví dialog přes `flow.branch { if:{var:"karma",op,value} }` nebo Karrel `whenVar { key:"karma", … }`. Když to level nepoužije, jede čistě podle scénáře.
+
+### C) Vstupní brána — `game.input.enable/disable`
+
+Akce `game.input.disable` / `game.input.enable` zapínají/vypínají předávání vstupů do scheduleru (pasti, `forbidden` pravidla) i do Karrela. Používá se pro „hluché" úvody/závěry monologů a pro vymezení ostrého okna interakce.
+
+### D) Renderovací poznámky (klient)
+
+- `ui.layer type:"image"` se vykresluje jako **velká čtvercová dlaždice** (emoji v `props.text`) — používá se pro captcha mřížku (rohy + `top`/`bottom`).
+- `effect.*` renderer aktuálně vizuálně podporuje `invert`, `blur`, `glitch`; ostatní typy se uloží do stavu bez vizuálu.
+- `props.variant` se ukládá, ale renderer podle něj zatím nemění barvu.
+- Po konci levelu UI ukáže okno **Pokračovat** → `id + 1` (po výhře i prohře); auto-logout odpočet byl odstraněn.
+
